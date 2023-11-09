@@ -103,8 +103,8 @@ public class db {
         String uuid = message.getUuid().toString();
 
         // Create directories for sender and receiver if they don't exist
-        String senderDirPath = root + "/messages/" + senderUsername;
-        String receiverDirPath = root + "/messages/" + receiverUsername;
+        String senderDirPath = root + "/messages/" + senderUsername + "/sent/" + receiverUsername;
+        String receiverDirPath = root + "/messages/" + receiverUsername + "/received/" + senderUsername;
 
         createDirectory(senderDirPath);
         createDirectory(receiverDirPath);
@@ -128,26 +128,34 @@ public class db {
         return message;
     }
 
+    // Retrieve a message from the database using its UUID
     public static Message getMessage(String uuid) {
         File rootDirectory = new File(root + "/messages");
         File[] messageDirectories = rootDirectory.listFiles();
 
         if (messageDirectories != null) {
             for (File directory : messageDirectories) {
-                String filePath = directory.getPath() + "/" + uuid + ".message";
-                File messageFile = new File(filePath);
+                String senderReceiverDirPath = directory.getPath() + "/received";
+                File[] senderReceiverDirs = new File(senderReceiverDirPath).listFiles();
 
-                if (messageFile.exists()) {
-                    try (FileInputStream fileInputStream = new FileInputStream(filePath);
-                         ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
+                if (senderReceiverDirs != null) {
+                    for (File senderReceiverDir : senderReceiverDirs) {
+                        String filePath = senderReceiverDir.getPath() + "/" + uuid + ".message";
+                        File messageFile = new File(filePath);
 
-                        Message message = (Message) objectInputStream.readObject();
-                        output.debugPrint("Message deserialized from " + filePath);
-                        return message;
-                    } catch (IOException | ClassNotFoundException e) {
-                        output.debugPrint("Failed to get message from " + filePath);
-                        output.debugPrint(Arrays.toString(e.getStackTrace()));
-                        return null;
+                        if (messageFile.exists()) {
+                            try (FileInputStream fileInputStream = new FileInputStream(filePath);
+                                 ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
+
+                                Message message = (Message) objectInputStream.readObject();
+                                output.debugPrint("Message deserialized from " + filePath);
+                                return message;
+                            } catch (IOException | ClassNotFoundException e) {
+                                output.debugPrint("Failed to get message from " + filePath);
+                                output.debugPrint(Arrays.toString(e.getStackTrace()));
+                                return null;
+                            }
+                        }
                     }
                 }
             }
