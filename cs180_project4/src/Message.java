@@ -1,7 +1,8 @@
+import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
 
-public class Message {
+public class Message implements Serializable {
     User sender;
     User receiver;
     String message;
@@ -23,6 +24,7 @@ public class Message {
         this.timestamp = timestamp;
         this.uuid = uuid;
     }
+
     public Message(User sender, User receiver, String message, Date timestamp) {
         this.sender = sender;
         this.receiver = receiver;

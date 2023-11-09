@@ -1,9 +1,7 @@
-
 import java.io.Serializable;
 
 enum userType {
-    CUSTOMER,
-    SELLER
+    CUSTOMER, SELLER
 }
 
 public class User implements Serializable {
@@ -12,7 +10,7 @@ public class User implements Serializable {
     String password;
 
     public static User createUser(userType type, String username, String password) {
-        if(db.getUser(username) != null){
+        if (db.getUser(username) != null) {
             output.debugPrint("User with username {" + username + "} already exists.");
             return null;
         }
@@ -20,6 +18,13 @@ public class User implements Serializable {
         db.saveUser(user);
         output.debugPrint("Created and saved new User : " + user);
         return user;
+    }
+
+
+    public Message sendmessage(User receiver, String message) {
+
+        return db.saveMessage(new Message(this, receiver, message));
+
     }
 
     private User(userType type, String username, String password) {
@@ -42,11 +47,7 @@ public class User implements Serializable {
 
     @Override
     public String toString() {
-        return "User{" +
-                "type=" + type +
-                ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                '}';
+        return "User{" + "type=" + type + ", username='" + username + '\'' + ", password='" + password + '\'' + '}';
     }
 
 

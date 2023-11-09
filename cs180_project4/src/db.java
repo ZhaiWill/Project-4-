@@ -67,7 +67,7 @@ public class db {
     }
 
     //CAUTION. WILL OVERWRITE
-    public static void saveUser(User user) {
+    public static User saveUser(User user) {
         String filePath = "storage/users/" + user.getUsername() + ".user";
 
         try (FileOutputStream fileOutputStream = new FileOutputStream(filePath); ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream)) {
@@ -77,7 +77,9 @@ public class db {
         } catch (IOException e) {
             output.debugPrint("Failed to save user to " + filePath);
             output.debugPrint(Arrays.toString(e.getStackTrace()));
+            return null;
         }
+        return user;
     }
 
     public static User getUser(String username) {
@@ -94,6 +96,66 @@ public class db {
             return null;
         }
     }
+
+    public static Message saveMessage(Message message) {
+        String senderUsername = message.getSender().getUsername();
+        String receiverUsername = message.getReceiver().getUsername();
+        String uuid = message.getUuid().toString();
+
+        // Create directories for sender and receiver if they don't exist
+        String senderDirPath = root + "/messages/" + senderUsername;
+        String receiverDirPath = root + "/messages/" + receiverUsername;
+
+        createDirectory(senderDirPath);
+        createDirectory(receiverDirPath);
+
+        String senderFilePath = senderDirPath + "/" + uuid + ".message";
+        String receiverFilePath = receiverDirPath + "/" + uuid + ".message";
+
+        try (FileOutputStream senderOutputStream = new FileOutputStream(senderFilePath);
+             ObjectOutputStream senderObjectOutputStream = new ObjectOutputStream(senderOutputStream);
+             FileOutputStream receiverOutputStream = new FileOutputStream(receiverFilePath);
+             ObjectOutputStream receiverObjectOutputStream = new ObjectOutputStream(receiverOutputStream)) {
+
+            senderObjectOutputStream.writeObject(message);
+            receiverObjectOutputStream.writeObject(message);
+            output.debugPrint("Message serialized and saved to " + senderFilePath + " and " + receiverFilePath);
+        } catch (IOException e) {
+            output.debugPrint("Failed to save message to " + senderFilePath + " and " + receiverFilePath);
+            output.debugPrint(Arrays.toString(e.getStackTrace()));
+            return null;
+        }
+        return message;
+    }
+
+    public static Message getMessage(String uuid) {
+        File rootDirectory = new File(root + "/messages");
+        File[] messageDirectories = rootDirectory.listFiles();
+
+        if (messageDirectories != null) {
+            for (File directory : messageDirectories) {
+                String filePath = directory.getPath() + "/" + uuid + ".message";
+                File messageFile = new File(filePath);
+
+                if (messageFile.exists()) {
+                    try (FileInputStream fileInputStream = new FileInputStream(filePath);
+                         ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
+
+                        Message message = (Message) objectInputStream.readObject();
+                        output.debugPrint("Message deserialized from " + filePath);
+                        return message;
+                    } catch (IOException | ClassNotFoundException e) {
+                        output.debugPrint("Failed to get message from " + filePath);
+                        output.debugPrint(Arrays.toString(e.getStackTrace()));
+                        return null;
+                    }
+                }
+            }
+        }
+
+        return null; // Message not found
+    }
+
 }
 
 
