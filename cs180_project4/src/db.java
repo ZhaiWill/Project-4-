@@ -2,9 +2,6 @@ import java.io.*;
 import java.util.Arrays;
 
 
-
-
-
 public class db {
     private static String root = "storage";
 
@@ -19,6 +16,7 @@ public class db {
         }
         return true;
     }
+
     private static void deleteDirectory(File directory) {
         File[] files = directory.listFiles();
         if (files != null) {
@@ -72,8 +70,7 @@ public class db {
     public static void saveUser(User user) {
         String filePath = "storage/users/" + user.getUsername() + ".user";
 
-        try (FileOutputStream fileOutputStream = new FileOutputStream(filePath);
-             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream)) {
+        try (FileOutputStream fileOutputStream = new FileOutputStream(filePath); ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream)) {
 
             objectOutputStream.writeObject(user);
             output.debugPrint("User serialized and saved to " + filePath);
@@ -86,8 +83,7 @@ public class db {
     public static User getUser(String username) {
         String filePath = "storage/users/" + username + ".user";
 
-        try (FileInputStream fileInputStream = new FileInputStream(filePath);
-             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
+        try (FileInputStream fileInputStream = new FileInputStream(filePath); ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
 
             User user = (User) objectInputStream.readObject();
             output.debugPrint("User deserialized from " + filePath);
