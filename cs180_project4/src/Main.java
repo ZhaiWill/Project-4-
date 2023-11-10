@@ -32,7 +32,7 @@ public class Main {
         System.out.println("What's your Username?");
         String username = s.nextLine();
 
-        if (db.checkUsername(username)) {
+        if (db.getUser(username) != null) {
             User u = db.getUser(username);
             System.out.println("What's your password?");
             String password = s.nextLine();
