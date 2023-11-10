@@ -6,7 +6,7 @@ public class Main {
         Scanner s = new Scanner(System.in);
         System.out.println("Enter your new username: ");
         String newUsername = s.nextLine();
-        System.out.println("Enter your password:");
+        System.out.println( "Enter your password:");
         String newPassword = s.nextLine();
         System.out.println("Enter your email:");
         String email = s.nextLine();
@@ -44,7 +44,10 @@ public class Main {
         System.out.println(db.getMessage(String.valueOf(preSaveMessage.getUuid())));
         db.editMessage(preSaveMessage, "new message");
         System.out.println(db.getMessage(String.valueOf(preSaveMessage.getUuid())));
-        db.removeMessage(1,preSaveMessage);
-        System.out.println("Test:" + db.getMessage(String.valueOf(preSaveMessage.getUuid())));
+
+       db.editMessage(preSaveMessage, "hello i edited you");
+
+    
+        db.removeMessage(user2,preSaveMessage);
     }
 }
