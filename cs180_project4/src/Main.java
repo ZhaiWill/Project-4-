@@ -2,11 +2,11 @@ import java.util.Scanner;
 import java.util.UUID;
 
 public class Main {
-    public void createAccount() {
+    public User createAccount() {
         Scanner s = new Scanner(System.in);
         System.out.println("Enter your new username: ");
         String newUsername = s.nextLine();
-        System.out.println( "Enter your password:");
+        System.out.println("Enter your password:");
         String newPassword = s.nextLine();
         System.out.println("Enter your email:");
         String email = s.nextLine();
@@ -15,16 +15,39 @@ public class Main {
             String sellOrBuy = s.nextLine();
             if (sellOrBuy.toLowerCase().equals("buyer")) {
                 User newUser = User.createUser(userType.CUSTOMER, newUsername, newPassword, email);
-                break;
+                return newUser;
             } else if (sellOrBuy.toLowerCase().equals("seller")) {
                 User newUser = User.createUser(userType.SELLER, newUsername, newPassword, email);
-                break;
+                return newUser;
             } else {
                 System.out.println("Sorry, not a valid option!");
             }
         }
-        s.close();
     }
+
+    public boolean loginToAccount() { // to log into an existing account
+
+        Scanner s = new Scanner(System.in);
+        System.out.println("What's your Username?");
+        String username = s.nextLine();
+
+        if (db.checkUsername(username)) {
+            User u = db.getUser(username);
+            System.out.println("What's your password?");
+            String password = s.nextLine();
+            if (password.equals(u.getPassword())) {
+                System.out.println("Password is correct!");
+                return true; // returns true only if login is successful
+            } else {
+                System.out.println("Password is incorrect.");
+                return false;
+            }
+        } else {
+            System.out.println("User with that username does not exist.");
+            return false;
+        }
+    }
+
     public static void main(String[] args) {
         db.initializeDatabase();
 
@@ -44,10 +67,7 @@ public class Main {
         System.out.println(db.getMessage(String.valueOf(preSaveMessage.getUuid())));
         db.editMessage(preSaveMessage, "new message");
         System.out.println(db.getMessage(String.valueOf(preSaveMessage.getUuid())));
-
-       db.editMessage(preSaveMessage, "hello i edited you");
-
-    
-        db.removeMessage(user2,preSaveMessage);
+        db.removeMessage(1,preSaveMessage);
+        System.out.println("Test:" + db.getMessage(String.valueOf(preSaveMessage.getUuid())));
     }
 }
