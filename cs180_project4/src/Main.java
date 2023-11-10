@@ -25,6 +25,30 @@ public class Main {
         }
         s.close();
     }
+
+    public boolean loginToAccount() { // to log into an existing account
+
+        Scanner s = new Scanner(System.in);
+        System.out.println("What's your Username?");
+        String username = s.nextLine();
+
+        if (db.checkUsername(username)) {
+            User u = db.getUser(username);
+            System.out.println("What's your password?");
+            String password = s.nextLine();
+            if (password.equals(u.getPassword())) {
+                System.out.println("Password is correct!");
+                return true; // returns true only if login is successful
+            } else {
+                System.out.println("Password is incorrect.");
+                return false;
+            }
+        } else {
+            System.out.println("User with that username does not exist.");
+            return false;
+        }
+    }
+    
     public static void main(String[] args) {
         db.initializeDatabase();
 
