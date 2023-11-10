@@ -2,7 +2,7 @@ import java.util.Scanner;
 import java.util.UUID;
 
 public class Main {
-    public void createAccount() {
+    public static User createAccount() {
         Scanner s = new Scanner(System.in);
         System.out.println("Enter your new username: ");
         String newUsername = s.nextLine();
@@ -13,39 +13,41 @@ public class Main {
         while (true) {
             System.out.println("Are you a seller or a buyer?");
             String sellOrBuy = s.nextLine();
-            if (sellOrBuy.toLowerCase().equals("buyer")) {
+            if (sellOrBuy.toLowerCase().equalsIgnoreCase("buyer")) {
                 User newUser = User.createUser(userType.CUSTOMER, newUsername, newPassword, email);
-                break;
-            } else if (sellOrBuy.toLowerCase().equals("seller")) {
+                 s.close();
+                return newUser;
+            } else if (sellOrBuy.toLowerCase().equalsIgnoreCase("seller")) {
                 User newUser = User.createUser(userType.SELLER, newUsername, newPassword, email);
-                break;
+                s.close();
+                return newUser;
             } else {
                 System.out.println("Sorry, not a valid option!");
             }
         }
-        s.close();
     }
 
-    public boolean loginToAccount() { // to log into an existing account
-
+    public static User loginToAccount() { // to log into an existing account
         Scanner s = new Scanner(System.in);
-        System.out.println("What's your Username?");
-        String username = s.nextLine();
-
-        if (db.getUser(username) != null) {
-            User u = db.getUser(username);
-            System.out.println("What's your password?");
-            String password = s.nextLine();
-            if (password.equals(u.getPassword())) {
-                System.out.println("Password is correct!");
-                return true; // returns true only if login is successful
+        System.out.println("Please enter your username:");
+            while (true) {
+            String username = s.nextLine();
+            User user = db.getUser(username);
+            if (user != null) {
+                System.out.println("Enter your password");
+                while (true) {
+                String password = s.nextLine();
+                if (user.getPassword().equals(password)) {
+                    System.out.println("Successfully signed in!");
+                    s.close();
+                    return user;
+                } else {
+                    System.out.println("Error! Incorrect password. Please try again");
+                    }
+                }
             } else {
-                System.out.println("Password is incorrect.");
-                return false;
+                System.out.println("Error, no user with username " + username + " found. Please try again");
             }
-        } else {
-            System.out.println("User with that username does not exist.");
-            return false;
         }
     }
     
