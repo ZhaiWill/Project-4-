@@ -2,6 +2,18 @@ import java.util.Scanner;
 import java.util.UUID;
 
 public class Main {
+    public static int openingPrompt() {
+        Scanner s = new Scanner(System.in);
+        System.out.println("Welcome!\n 1. Sign in to account\n 2. Create new Account");
+        while (true) {
+            int choice = s.nextInt();
+            if (choice < 1 || choice > 2) {
+                System.out.println("Please select either 1 or 2");
+            } else{
+                return choice;
+            }
+        }
+    }
     public static User createAccount() {
         Scanner s = new Scanner(System.in);
         System.out.println("Enter your new username: ");
@@ -52,32 +64,14 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        db.initializeDatabase();
+        //ALL TESTS ARE NOW IN TEST.JAVA SO WE CAN START IMPLEMENTING MAIN METHOD
 
-        User user1 = User.createUser(userType.CUSTOMER, "john123", "abc123!!", "random@gmail.com");
-        User user2 = User.createUser(userType.SELLER, "ANDY", "51242", "random2@gmail.com");
-        System.out.println(user1);
-        System.out.println(db.getUser("john123"));
-
-        System.out.println(user2);
-        System.out.println(db.getUser("ANDY"));
-
-        assert user1 != null;
-        assert user2 != null;
-
-        Message preSaveMessage = user1.sendmessage(user2, "Hello, how are you?");
-        System.out.println(preSaveMessage);
-        System.out.println(db.getMessage(String.valueOf(preSaveMessage.getUuid())));
-        db.editMessage(preSaveMessage, "new message");
-        System.out.println(db.getMessage(String.valueOf(preSaveMessage.getUuid())));
-
-        db.editMessage(preSaveMessage, "hello i edited you");
-        System.out.println(db.getMessage(String.valueOf(preSaveMessage.getUuid())));
-    
-        db.removeMessage(user2,preSaveMessage);
-
-        db.editMessage(preSaveMessage, "hello i TOO edited you");
-        db.editUsername(user2, "john123");
-        System.out.println(user2);
+        int choice = openingPrompt();
+        User thisUser;
+        if (choice == 1) {
+            thisUser = loginToAccount();
+        } else {
+            thisUser = createAccount();
+        }
     }
 }
