@@ -1,3 +1,4 @@
+import java.util.Scanner;
 import java.util.UUID;
 
 public class Main {
@@ -7,14 +8,16 @@ public class Main {
         String newUsername = s.nextLine();
         System.out.println("Enter your password:");
         String newPassword = s.nextLine();
+        System.out.println("Enter your email:");
+        String email = s.nextLine();
         while (true) {
             System.out.println("Are you a seller or a buyer?");
             String sellOrBuy = s.nextLine();
             if (sellOrBuy.toLowerCase().equals("buyer")) {
-                User newUser = User.createUser(userType.CUSTOMER, newUsername, newPassword);
+                User newUser = User.createUser(userType.CUSTOMER, newUsername, newPassword, email);
                 break;
             } else if (sellOrBuy.toLowerCase().equals("seller")) {
-                User newUser = User.createUser(userType.SELLER, newUsername, newPassword);
+                User newUser = User.createUser(userType.SELLER, newUsername, newPassword, email);
                 break;
             } else {
                 System.out.println("Sorry, not a valid option!");
@@ -25,8 +28,8 @@ public class Main {
     public static void main(String[] args) {
         db.initializeDatabase();
 
-        User user1 = User.createUser(userType.CUSTOMER, "john123", "abc123!!");
-        User user2 = User.createUser(userType.SELLER, "ANDY", "51242");
+        User user1 = User.createUser(userType.CUSTOMER, "john123", "abc123!!", "random@gmail.com");
+        User user2 = User.createUser(userType.SELLER, "ANDY", "51242", "random2@gmail.com");
         System.out.println(user1);
         System.out.println(db.getUser("john123"));
 
@@ -39,5 +42,9 @@ public class Main {
         Message preSaveMessage = user1.sendmessage(user2, "Hello, how are you?");
         System.out.println(preSaveMessage);
         System.out.println(db.getMessage(String.valueOf(preSaveMessage.getUuid())));
+        db.editMessage(preSaveMessage, "new message");
+        System.out.println(db.getMessage(String.valueOf(preSaveMessage.getUuid())));
+        db.removeMessage(1,preSaveMessage);
+        System.out.println("Test:" + db.getMessage(String.valueOf(preSaveMessage.getUuid())));
     }
 }

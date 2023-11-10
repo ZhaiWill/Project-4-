@@ -68,6 +68,7 @@ public class db {
 
     //CAUTION. WILL OVERWRITE
     public static User saveUser(User user) {
+        if (user == null) return null;
         String filePath = "storage/users/" + user.getUsername() + ".user";
 
         try (FileOutputStream fileOutputStream = new FileOutputStream(filePath); ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream)) {
@@ -98,6 +99,7 @@ public class db {
     }
 
     public static Message saveMessage(Message message) {
+        if (message.getReceiver() == null || message.getSender() == null) return null;
         String senderUsername = message.getSender().getUsername();
         String receiverUsername = message.getReceiver().getUsername();
         String uuid = message.getUuid().toString();
@@ -130,6 +132,7 @@ public class db {
 
     // Retrieve a message from the database using its UUID
     public static Message getMessage(String uuid) {
+        
         File rootDirectory = new File(root + "/messages");
         File[] messageDirectories = rootDirectory.listFiles();
 
@@ -145,9 +148,10 @@ public class db {
 
                         if (messageFile.exists()) {
                             try (FileInputStream fileInputStream = new FileInputStream(filePath);
-                                 ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
-
+                                ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
+                                
                                 Message message = (Message) objectInputStream.readObject();
+                                
                                 output.debugPrint("Message deserialized from " + filePath);
                                 return message;
                             } catch (IOException | ClassNotFoundException e) {
@@ -163,7 +167,39 @@ public class db {
 
         return null; // Message not found
     }
+    
+    public static String editMessage (Message editMessage, String newMessage) {
+        if (editMessage != null) {
+            editMessage.setMessage(newMessage);
+            saveMessage(editMessage);
+            editMessage.updateCurrentTimeStamp();
+            return editMessage.getMessage();
+        }
+        output.debugPrint("Error, message does not exist");
+        return null;
+    }
 
+    public static boolean removeMessage(int senderReceiver, Message message) { // 0 to make undreable to senders, 1 for receivers
+        
+        //Add functionality in main method to not display messages to relevant users who want to delete messages
+        
+        if (senderReceiver == 0) {
+            message.setReceiverReadable(false);
+            output.debugPrint("Message made unreadable to receiver");
+            db.saveMessage(message);
+            return true;
+        }
+
+        if (senderReceiver == 1) {
+            message.setSenderReadable(false);
+            output.debugPrint("Message made unreadable to sender");
+            db.saveMessage(message);
+            return true;
+        }
+
+        output.debugPrint("Error, enter 0 or 1 to make the message unreadable to senders or receivers");
+        return false;
+
+    }
 }
-
 
