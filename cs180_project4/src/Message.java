@@ -74,4 +74,8 @@ public class Message implements Serializable {
                 ", timestamp=" + timestamp +
                 ", uuid=" + uuid + '}';
     }
+
+    public void setContent(String newContent) {
+        this.message = newContent;
+    }
 }

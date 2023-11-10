@@ -132,33 +132,32 @@ public class db {
 
     // Retrieve a message from the database using its UUID
     public static Message getMessage(String uuid) {
-        
         File rootDirectory = new File(root + "/messages");
         File[] messageDirectories = rootDirectory.listFiles();
 
         if (messageDirectories != null) {
             for (File directory : messageDirectories) {
-                String senderReceiverDirPath = directory.getPath() + "/received";
-                File[] senderReceiverDirs = new File(senderReceiverDirPath).listFiles();
+                File[] receivedDirs = new File(directory.getPath() + "/received").listFiles();
+                File[] sentDirs = new File(directory.getPath() + "/sent").listFiles();
 
-                if (senderReceiverDirs != null) {
-                    for (File senderReceiverDir : senderReceiverDirs) {
-                        String filePath = senderReceiverDir.getPath() + "/" + uuid + ".message";
+                if (receivedDirs != null) {
+                    for (File receiverDir : receivedDirs) {
+                        String filePath = receiverDir.getPath() + "/" + uuid + ".message";
                         File messageFile = new File(filePath);
 
                         if (messageFile.exists()) {
-                            try (FileInputStream fileInputStream = new FileInputStream(filePath);
-                                ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
-                                
-                                Message message = (Message) objectInputStream.readObject();
-                                
-                                output.debugPrint("Message deserialized from " + filePath);
-                                return message;
-                            } catch (IOException | ClassNotFoundException e) {
-                                output.debugPrint("Failed to get message from " + filePath);
-                                output.debugPrint(Arrays.toString(e.getStackTrace()));
-                                return null;
-                            }
+                            return readMessageFromFile(filePath);
+                        }
+                    }
+                }
+
+                if (sentDirs != null) {
+                    for (File senderDir : sentDirs) {
+                        String filePath = senderDir.getPath() + "/" + uuid + ".message";
+                        File messageFile = new File(filePath);
+
+                        if (messageFile.exists()) {
+                            return readMessageFromFile(filePath);
                         }
                     }
                 }
@@ -166,36 +165,90 @@ public class db {
         }
         return null; // Message not found
     }
-    
-    public static void editMessage (Message editMessage, String newMessage) {
-        if (editMessage != null) {
-            editMessage.setMessage(newMessage);
-            saveMessage(editMessage);
+
+    private static Message readMessageFromFile(String filePath) {
+        try (FileInputStream fileInputStream = new FileInputStream(filePath);
+             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
+
+            Message message = (Message) objectInputStream.readObject();
+            output.debugPrint("Message deserialized from " + filePath);
+            return message;
+        } catch (IOException | ClassNotFoundException e) {
+            output.debugPrint("Failed to get message from " + filePath);
+            output.debugPrint(Arrays.toString(e.getStackTrace()));
+            return null;
         }
-        output.debugPrint("Error, message does not exist");
+    }
+
+
+    public static void editMessage(Message message, String newContent) {
+        if (!isMessageDeleted(message.sender, message)) {
+            saveEditedMessage(message, newContent, message.sender);
+        }
+        if (!isMessageDeleted(message.receiver, message)) {
+            saveEditedMessage(message, newContent, message.receiver);
+        }
+    }
+    private static void saveEditedMessage(Message message, String newContent, User user) {
+        String filePath = getMessageFilePath(user, message);
+
+        try (FileOutputStream fileOutputStream = new FileOutputStream(filePath);
+             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream)) {
+            message.setContent(newContent);
+            objectOutputStream.writeObject(message);
+            output.debugPrint("Message edited and saved to " + filePath);
+        } catch (IOException e) {
+            output.debugPrint("Failed to save edited message to " + filePath);
+            output.debugPrint(Arrays.toString(e.getStackTrace()));
+        }
     }
 
     public static boolean removeMessage(User user, Message message) {
-        
+        String uuid = message.getUuid().toString();
+        boolean isDeleterSender = user.username.equals(message.getSender().username);
+        String filepath = root + "/messages/";
+        if (isDeleterSender) {
+            filepath += message.getSender().username + "/sent/" + message.getReceiver().username;
+
+        } else {
+            filepath += message.getReceiver().username + "/received/" + message.getSender().username;
+        }
+        filepath += "/" + message.uuid + ".message";
+        File messageFile = new File(filepath);
+        if (!messageFile.exists()) {
+            output.debugPrint("User " + user + " does not have access to " + message);
+            return false;
+        }
+
+        messageFile.delete();
+        output.debugPrint("User " + user + " successfully deleted " + message);
+        return true;
+    }
+
+    //HELPER METHODS
+    private static String getMessageFilePath(User user, Message message) {
         String senderUsername = message.getSender().getUsername();
         String receiverUsername = message.getReceiver().getUsername();
         String uuid = message.getUuid().toString();
 
-        String senderDirPath = root + "/messages/" + senderUsername + "/sent/" + receiverUsername;
-        String receiverDirPath = root + "/messages/" + receiverUsername + "/received/" + senderUsername;
+        boolean isDeleterSender = user.getUsername().equals(senderUsername);
+        String filePath = root + "/messages/";
 
-        String senderFilePath = senderDirPath + "/" + uuid + ".message";
-        String receiverFilePath = receiverDirPath + "/" + uuid + ".message";
-
-        
-        if (message.getReceiver().equals(user)) {
-            File removeMe = new File(receiverFilePath);
-            removeMe.delete();
+        if (isDeleterSender) {
+            filePath += senderUsername + "/sent/" + receiverUsername;
         } else {
-            File removeMe = new File(senderFilePath);
-            removeMe.delete();
+            filePath += receiverUsername + "/received/" + senderUsername;
         }
-        return true;
+
+        filePath += "/" + uuid + ".message";
+
+        return filePath;
+    }
+    private static boolean isMessageDeleted(User user, Message message) {
+        String filePath = getMessageFilePath(user, message);
+
+        File messageFile = new File(filePath);
+        return !messageFile.exists();
     }
 }
 

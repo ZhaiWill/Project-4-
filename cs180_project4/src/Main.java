@@ -46,8 +46,12 @@ public class Main {
         System.out.println(db.getMessage(String.valueOf(preSaveMessage.getUuid())));
 
        db.editMessage(preSaveMessage, "hello i edited you");
-
+        System.out.println(db.getMessage(String.valueOf(preSaveMessage.getUuid())));
     
         db.removeMessage(user2,preSaveMessage);
+
+        db.editMessage(preSaveMessage, "hello i TOO edited you");
+        System.out.println(db.getMessage(String.valueOf(preSaveMessage.getUuid())));
+
     }
 }
