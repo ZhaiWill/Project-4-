@@ -1,6 +1,27 @@
 import java.util.UUID;
 
 public class Main {
+    public void createAccount() {
+        Scanner s = new Scanner(System.in);
+        System.out.println("Enter your new username: ");
+        String newUsername = s.nextLine();
+        System.out.println("Enter your password:");
+        String newPassword = s.nextLine();
+        while (true) {
+            System.out.println("Are you a seller or a buyer?");
+            String sellOrBuy = s.nextLine();
+            if (sellOrBuy.toLowerCase().equals("buyer")) {
+                User newUser = User.createUser(userType.CUSTOMER, newUsername, newPassword);
+                break;
+            } else if (sellOrBuy.toLowerCase().equals("seller")) {
+                User newUser = User.createUser(userType.SELLER, newUsername, newPassword);
+                break;
+            } else {
+                System.out.println("Sorry, not a valid option!");
+            }
+        }
+        s.close();
+    }
     public static void main(String[] args) {
         db.initializeDatabase();
 
