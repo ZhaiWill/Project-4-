@@ -78,4 +78,11 @@ public class Message implements Serializable {
     public void setContent(String newContent) {
         this.message = newContent;
     }
+
+    public static boolean isValidMessage(Message message) {
+        if (message.getReceiver().isType() == message.getSender().isType()) {
+            return false;
+        }
+        return true;
+    }
 }

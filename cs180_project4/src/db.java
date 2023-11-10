@@ -100,7 +100,7 @@ public class db {
 
     
     public static Message saveMessage(Message message) {
-        //if (message.getReceiver() == null || message.getSender() == null) return null;
+        if (!Message.isValidMessage(message)) return null;
         String senderUsername = message.getSender().getUsername();
         String receiverUsername = message.getReceiver().getUsername();
         String uuid = message.getUuid().toString();
