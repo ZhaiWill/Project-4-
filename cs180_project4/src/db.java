@@ -98,15 +98,6 @@ public class db {
         }
     }
 
-    public static boolean checkUsername(String username) { // checks if username is in storage
-        String filePath = "storage/users/" + username + ".user";
-        File f = new File(filePath);
-        if (f.exists()) {
-            return true;
-        } else {
-            return false;
-        }
-    }
     
     public static Message saveMessage(Message message) {
         //if (message.getReceiver() == null || message.getSender() == null) return null;
