@@ -36,13 +36,13 @@ public class Main {
             if (user != null) {
                 System.out.println("Enter your password");
                 while (true) {
-                String password = s.nextLine();
-                if (user.getPassword().equals(password)) {
-                    System.out.println("Successfully signed in!");
-                    s.close();
-                    return user;
-                } else {
-                    System.out.println("Error! Incorrect password. Please try again");
+                    String password = s.nextLine();
+                    if (user.getPassword().equals(password)) {
+                        System.out.println("Successfully signed in!");
+                        s.close();
+                        return user;
+                    } else {
+                        System.out.println("Error! Incorrect password. Please try again");
                     }
                 }
             } else {
@@ -71,13 +71,13 @@ public class Main {
         db.editMessage(preSaveMessage, "new message");
         System.out.println(db.getMessage(String.valueOf(preSaveMessage.getUuid())));
 
-       db.editMessage(preSaveMessage, "hello i edited you");
+        db.editMessage(preSaveMessage, "hello i edited you");
         System.out.println(db.getMessage(String.valueOf(preSaveMessage.getUuid())));
     
         db.removeMessage(user2,preSaveMessage);
 
         db.editMessage(preSaveMessage, "hello i TOO edited you");
-        System.out.println(db.getMessage(String.valueOf(preSaveMessage.getUuid())));
-
+        db.editUsername(user2, "john123");
+        System.out.println(user2);
     }
 }

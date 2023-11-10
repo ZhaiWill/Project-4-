@@ -98,7 +98,32 @@ public class db {
         }
     }
 
+    public static boolean deleteUser(User user) {
+        String username = user.getUsername();
+        String filePath = "storage/users/" + username + ".user";
+
+        File file = new File(filePath);
+        file.delete();
+        output.debugPrint("User deleted");
+        return true;
+    }
     
+    public static boolean editUsername(User user, String newUsername) {
+        if (db.getUser(user.getUsername()) != null) {
+            output.debugPrint("User with username {" + user.getUsername() + "} already exists.");
+            return false;
+        }
+        user.setUsername(newUsername);
+        saveUser(user);
+        return true;
+    }
+
+    public static boolean editPassword(User user, String newUsername) {
+        user.setPassword(newUsername);
+        saveUser(user);
+        return true;
+    }
+
     public static Message saveMessage(Message message) {
         if (!Message.isValidMessage(message)) return null;
         String senderUsername = message.getSender().getUsername();
