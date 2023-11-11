@@ -68,6 +68,48 @@ public class Main {
         }
     }
 
+    public static void initMenuSeller() {
+        Scanner s = new Scanner(System.in);
+        boolean repeat = true;
+        System.out.println("1. Read all messages\n2. Send message\n3. Manage account\n" +
+                            "4. Manage stores\n5. View statistics\n6. Manage messages\n7. Exit");
+        while (repeat) {
+            int input = s.nextInt();
+            switch (input) {
+                // TODO: implement menus for initial menu 
+                case 1 -> System.out.println(input);
+                case 2 -> System.out.println(input);
+                case 3 -> System.out.println(input);
+                case 4 -> System.out.println(input);
+                case 5 -> System.out.println(input);
+                case 6 -> System.out.println(input);
+                case 7 -> repeat = false;
+                default -> System.out.println("Error! Invalid input");
+            }
+        }
+    }
+
+    public static void initMenuBuyer() {
+        Scanner s = new Scanner(System.in);
+        boolean repeat = true;
+        System.out.println("1. Read all messages\n2. Send message\n3. Manage account\n" +
+                            "4. Browse stores\n5. View statistics\n6. Manage messages\n7. Exit");
+        while (repeat) {
+            int input = s.nextInt();
+            switch (input) {
+                // TODO: implement menus for initial menu 
+                case 1 -> System.out.println(input);
+                case 2 -> System.out.println(input);
+                case 3 -> System.out.println(input);
+                case 4 -> System.out.println(input);
+                case 5 -> System.out.println(input);
+                case 6 -> System.out.println(input);
+                case 7 -> repeat = false;
+                default -> System.out.println("Error! Invalid input");
+            }
+        }
+    }
+
     public static void main(String[] args) {
         //ALL TESTS ARE NOW IN TEST.JAVA SO WE CAN START IMPLEMENTING MAIN METHOD
 

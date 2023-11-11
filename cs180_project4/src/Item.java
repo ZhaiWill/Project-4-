@@ -1,4 +1,5 @@
-public class Item {
+import java.io.Serializable;
+public class Item implements Serializable{
     double price;
     int quantity;
     String name;
@@ -24,5 +25,10 @@ public class Item {
     }
     public void setName(String name) {
         this.name = name;
+    }
+    public String toString() {
+        return "Item<Price=" + price +
+        ", quantity=" + quantity +
+        ", name=" + name + ">";
     }
 }

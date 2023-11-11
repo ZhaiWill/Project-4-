@@ -1,15 +1,15 @@
+import java.io.Serializable;
 import java.util.ArrayList;
-public class Store {
+import java.util.Arrays;
+public class Store implements Serializable {
     String name;
     User owner;
-    ArrayList<User> customers;
     ArrayList<Item> items;
     
-    public Store(String name, User owner, ArrayList<Item> items, ArrayList<User> customers) {
+    public Store(String name, User owner, ArrayList<Item> items) {
         this.name = name;
         this.owner = owner;
         this.items = items;
-        this.customers = customers;
     }
     
     public String getName() {
@@ -21,7 +21,6 @@ public class Store {
     public User getOwner() {
         return owner;
     }
-    
     public void setOwner(User owner) {
         this.owner = owner;
     }
@@ -31,23 +30,12 @@ public class Store {
     public void setItems(ArrayList<Item> items) {
         this.items = items;
     }
-
     public void addItem(Item item) {
         this.items.add(item);
     }
-
-    public ArrayList<User> getCustomers() {
-        return customers;
+    public String toString() {
+        return "Item<Owner=" + owner +
+        ", Name=" + name + ", items=" +
+        items + ">";
     }
-    
-    public void addCustomer(User u) {
-        if (u.isType() == userType.CUSTOMER) {
-            this.customers.add(u);
-        }
-        else {
-            System.out.println("Sellers can't be customers!");
-        }
-    }
-
-
 }

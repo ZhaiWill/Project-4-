@@ -281,7 +281,7 @@ public class db {
         try (FileOutputStream fileOutputStream = new FileOutputStream(filePath); ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream)) {
 
             objectOutputStream.writeObject(store);
-            output.debugPrint("User serialized and saved to " + store);
+            output.debugPrint("User serialized and saved to " + store + ".store");
         } catch (IOException e) {
             output.debugPrint("Failed to save user to " + filePath);
             output.debugPrint(Arrays.toString(e.getStackTrace()));
@@ -294,7 +294,7 @@ public class db {
         String itemName = item.getName();
         String storeName = store.getName();
         
-        String storeDirPath = root + "/stores/" + storeName;
+        String storeDirPath = root + "/stores/" + storeName + ".store";
 
         createDirectory(storeDirPath);
 
