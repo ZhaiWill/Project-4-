@@ -27,5 +27,10 @@ public class Test {
         db.editMessage(preSaveMessage, "hello i TOO edited you");
         db.editUsername(user2, "john123");
         System.out.println(user2);
+
+        Store store = new Store("name", user2, null);
+        Item item = new Item(0, 0, "name");
+        db.saveStore(store);
+        db.saveItem(store,item);
     }
 }

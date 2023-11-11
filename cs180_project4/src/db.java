@@ -48,8 +48,9 @@ public class db {
         // Create directories for users and messages
         String usersDirectoryPath = root + "/users";
         String messagesDirectoryPath = root + "/messages";
-
-        if (createDirectory(usersDirectoryPath) && createDirectory(messagesDirectoryPath)) {
+        String storesDirectoryPath = root + "/stores";
+        
+        if (createDirectory(usersDirectoryPath) && createDirectory(messagesDirectoryPath)  && createDirectory(storesDirectoryPath)) {
             output.debugPrint("User and messages directories created.");
             return true;
         } else {
@@ -65,7 +66,6 @@ public class db {
         }
         return true;
     }
-
     //CAUTION. WILL OVERWRITE
     public static User saveUser(User user) {
         //if (user == null) return null;
@@ -206,7 +206,6 @@ public class db {
         }
     }
 
-
     public static void editMessage(Message message, String newContent) {
         if (!isMessageDeleted(message.sender, message)) {
             saveEditedMessage(message, newContent, message.sender);
@@ -275,5 +274,42 @@ public class db {
 
         File messageFile = new File(filePath);
         return !messageFile.exists();
+    }
+    public static Store saveStore(Store store) {
+        String filePath = "storage/stores/" + store.getName() + ".store";
+
+        try (FileOutputStream fileOutputStream = new FileOutputStream(filePath); ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream)) {
+
+            objectOutputStream.writeObject(store);
+            output.debugPrint("User serialized and saved to " + store);
+        } catch (IOException e) {
+            output.debugPrint("Failed to save user to " + filePath);
+            output.debugPrint(Arrays.toString(e.getStackTrace()));
+            return null;
+        }
+        return store;
+    }
+
+    public static Item saveItem(Store store, Item item) {
+        String itemName = item.getName();
+        String storeName = store.getName();
+        
+        String storeDirPath = root + "/stores/" + storeName;
+
+        createDirectory(storeDirPath);
+
+        String itemFilePath = storeDirPath + "/" + itemName + ".item";
+
+        try (FileOutputStream senderOutputStream = new FileOutputStream(itemFilePath);
+             ObjectOutputStream senderObjectOutputStream = new ObjectOutputStream(senderOutputStream)){
+
+            senderObjectOutputStream.writeObject(item);
+            output.debugPrint("Wrote object to " + itemFilePath);
+        } catch (IOException e) {
+            output.debugPrint("Failed to write item to " + itemFilePath);
+            output.debugPrint(Arrays.toString(e.getStackTrace()));
+            return null;
+        }
+        return item;
     }
 }
