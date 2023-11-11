@@ -12,6 +12,11 @@ public class Main {
             } else{
                 return choice;
             }
+            if (choice == 1) {
+                loginToAccount();
+            } else if (choice == 2) {
+                createAccount();
+            }
         }
     }
     public static User createAccount() {
