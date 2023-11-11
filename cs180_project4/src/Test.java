@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 public class Test {
     public static void main(String[] args) {
         db.initializeDatabase();
@@ -28,9 +30,14 @@ public class Test {
         db.editUsername(user2, "john123");
         System.out.println(user2);
 
-        Store store = new Store("name", user2, null);
-        Item item = new Item(0, 0, "name");
+        ArrayList<Item> items = new ArrayList();
+        Item item = new Item(0, 0, "itemname");
+        items.add(item);
+
+        Store store = new Store("storename", user2, items);
         db.saveStore(store);
-        db.saveItem(store,item);
+        db.saveItem(store, item);
+        db.removeItem(store, item);
+        System.out.println("TEST: " + db.readItemFromFile(store,item));
     }
 }

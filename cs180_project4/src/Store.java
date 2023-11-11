@@ -33,6 +33,9 @@ public class Store implements Serializable {
     public void addItem(Item item) {
         this.items.add(item);
     }
+    public void removeItem(Item item) {
+        this.items.remove(item);
+    }
     public String toString() {
         return "Item<Owner=" + owner +
         ", Name=" + name + ", items=" +

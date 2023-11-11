@@ -276,14 +276,17 @@ public class db {
         return !messageFile.exists();
     }
     public static Store saveStore(Store store) {
-        String filePath = "storage/stores/" + store.getName() + ".store";
+        String dirPath = "storage/stores/" + store.getName() + ".store";
+        
+        createDirectory(dirPath);
 
-        try (FileOutputStream fileOutputStream = new FileOutputStream(filePath); ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream)) {
+        try (FileOutputStream fileOutputStream = new FileOutputStream(dirPath); 
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream)) {
 
             objectOutputStream.writeObject(store);
             output.debugPrint("User serialized and saved to " + store + ".store");
         } catch (IOException e) {
-            output.debugPrint("Failed to save user to " + filePath);
+            output.debugPrint("Failed to save user to " + dirPath);
             output.debugPrint(Arrays.toString(e.getStackTrace()));
             return null;
         }
@@ -311,5 +314,45 @@ public class db {
             return null;
         }
         return item;
+    }
+
+    public static boolean removeStore(Store store) {
+        String storeDirPath = root + "/stores/" + store.getName() + ".store";
+        File f = new File(storeDirPath);
+        f.delete();
+        return true;
+    }
+    
+    public static boolean removeItem(Store store, Item item) {
+        String itemName = item.getName();
+        String storeName = store.getName();
+        
+        String storeDirPath = root + "/stores/" + storeName + ".store";
+        String itemFilePath = storeDirPath + "/" + itemName + ".item";
+
+        File f = new File(itemFilePath);
+        f.delete();
+        return true;
+    }
+
+    public static Item readItemFromFile(Store store, Item item) {
+        
+        String itemName = item.getName();
+        String storeName = store.getName();
+        
+        String storeDirPath = root + "/stores/" + storeName + ".store";
+        String itemFilePath = storeDirPath + "/" + itemName + ".item";
+        
+        try (FileInputStream fileInputStream = new FileInputStream(itemFilePath);
+             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
+            
+            Item newItem = (Item) objectInputStream.readObject();
+            output.debugPrint("Message deserialized from " + itemFilePath);
+            return newItem;
+        } catch (IOException | ClassNotFoundException e) {
+            output.debugPrint("Failed to get message from " + itemFilePath);
+            output.debugPrint(Arrays.toString(e.getStackTrace()));
+            return null;
+        }
     }
 }
