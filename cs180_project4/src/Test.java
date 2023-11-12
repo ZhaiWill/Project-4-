@@ -31,13 +31,17 @@ public class Test {
         System.out.println(user2);
 
         ArrayList<Item> items = new ArrayList();
-        Item item = new Item(0, 0, "itemname");
+        Item item = new Item(0, 5, "itemname");
         items.add(item);
 
         Store store = new Store("storename", user2, items);
+        Store store2 = new Store("storename2", user2, items);
         db.saveStore(store);
+        db.saveStore(store2);
         db.saveItem(store, item);
-        db.removeItem(store, item);
-        System.out.println("TEST: " + db.readItemFromFile(store,item));
+
+        db.restockItem(store, "itemname", 2);
+        db.buyItem(store, "itemname", 56);
+        System.out.println("TEST: " + db.readItemFromFile(store,"itemname"));
     }
 }

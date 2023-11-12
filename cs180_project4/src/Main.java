@@ -32,7 +32,7 @@ public class Main {
             String sellOrBuy = s.nextLine();
             if (sellOrBuy.toLowerCase().equalsIgnoreCase("buyer")) {
                 User newUser = User.createUser(userType.CUSTOMER, newUsername, newPassword, email);
-                 s.close();
+                s.close();
                 return newUser;
             } else if (sellOrBuy.toLowerCase().equalsIgnoreCase("seller")) {
                 User newUser = User.createUser(userType.SELLER, newUsername, newPassword, email);

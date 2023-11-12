@@ -335,9 +335,8 @@ public class db {
         return true;
     }
 
-    public static Item readItemFromFile(Store store, Item item) {
+    public static Item readItemFromFile(Store store, String itemName) {
         
-        String itemName = item.getName();
         String storeName = store.getName();
         
         String storeDirPath = root + "/stores/" + storeName + ".store";
@@ -354,5 +353,29 @@ public class db {
             output.debugPrint(Arrays.toString(e.getStackTrace()));
             return null;
         }
+    }
+
+   public static boolean buyItem(Store store, String itemName, int quantity) {
+        Item item = readItemFromFile(store, itemName);
+        if (item.getQuantity() - quantity < 0) {
+            output.debugPrint("Cannot have items with quantity less than 0");
+            return false;
+        }
+        item.setQuantity(item.getQuantity() - quantity);
+        db.saveItem(store, item);
+        output.debugPrint("Bought item successfully");
+        return true;
+    }
+    
+    public static boolean restockItem(Store store, String itemName, int quantity) {
+        Item item = readItemFromFile(store, itemName);
+        if (quantity <= 0) {
+            output.debugPrint("Cannot restock item with quantity less than or equal to zero");
+            return false;
+        }
+        item.setQuantity(item.getQuantity() + quantity);
+        db.saveItem(store, item);
+        output.debugPrint("Restocked item successfully");
+        return true;
     }
 }
