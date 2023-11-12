@@ -3,6 +3,7 @@ Project 4 - William, Farhan, Kyle, Elijah
 Option 2 - Messaging System
 
 1. Instructions on how to compile and run our project. 
+
 Select the .java file called "Main." Run the main method in order to start the program.
 
 2. List of who submitted each part on Vocareum/Brightspace.
