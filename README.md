@@ -1,72 +1,28 @@
 # Project-4-Messaging System
 Project 4 - William, Farhan, Kyle, Elijah
-Messaging System
-We chose option 2.
-The second option is to implement a marketplace messaging system. The messenger will allow for communication between sellers and customers. 
+Option 2 - Messaging System
 
-Looking for an example? Try checking out the messaging features in large online marketplaces with third party sellers, such as eBay or Etsy. 
+1. Instructions on how to compile and run our project. 
+Select the .java file called "Main." Run the main method in order to start the program.
 
-Reminder: You can assume that only one user is accessing the application at a time. A customer might log in, send a message then log out. A seller could then log in and read the message.  
+2. List of who submitted each part on Vocareum/Brightspace.
 
-Your implementation must have the following: 
+TBD (We need to start on the report)
 
-Core
+3. Descriptions of each class.
 
-Messages
+User.java: The user class contains information about every user who has created an account. This information includes ther username, password, and whether they are a customer or seller. This also indetacts with the "db" class with the "createUser" method. If a user with a given username already exists, that user will not be saved to the file system. There are also associated getters and setters used to retreive and set properties.
 
-Any customer can message any Seller, and any Seller may message any customer.
-Customers cannot message another customer. Sellers cannot message another seller. 
+Item.java: Describes an item of interest that can be sold in stores. Each item has a set quantity, price, and name associated with it. There are also associated getters and setters used to retreive and set properties.
 
-All users must have accounts to participate in a message. 
+Store.java: Contains information about a store including an array of items that can be sold at the store, its owner, and its name. There are also associated getters and setters used to retreive and set properties.
 
-No user may start a message to a user that does not exist.
+Message.java: This class contains describes a "message" object with a sender, receiver, the message content, a timestamp, and a UUID. The UUID is a unique string of bytes and works as a way of differentiating between messages, making it much easier to pull specific messages from storage. There are also associated getters and setters used to retreive and set properties.
 
-Access to a specific message must be limited to the participants in the conversation. 
-Users will have create, edit, and delete access to their personal conversation history. 
-Creating a message will create it for both the sender and the recipient. 
-Editing a message will update the contents for both the sender and the recipient. 
-Deleting a message will only delete it for the user who initiated the delete operation. 
-Individual messages should be labeled with the senders name in the conversation. 
+db.java: This method handles saving data to and pulling data from the root directory called "storage." This class contains methods for initializing the database, clearing the database, and creating/deleting directories. When initializing the database, the entirety of the database is deleted before the directories storing users, messages, and stores are created (without any of their prior data). There are also methods for saving users, messages, store information, and items to their respective directories.There are also methods in place to pull a specific message from the databse based on its ID, a user based on their username, or a store/item based on its name. In addition, methods for editing a usrename or pwassword and buying or restocking items exist in this class. This class interacts with Main by providing it with most of methods for saving data based on user input in addition to the User, Item, Store, and Message classes because it has to save these objects to storage.
 
-Sellers
+Main: This diisplays the UI so that users can easily create or login to accoutns, send/removee/edit messages, change account details, and interact with stores. This is all done through a variety of print statements and scanner inputs. As previously stated, the bulk of the work is done by "db" class ue to the fact that it is responsible for saving all data to the database. 
 
-Sellers should be able to view a list of customers to select an individual to message.
-Sellers should be able to search for a specific customer to message. 
+Test.java: This is simply a class with a main method that is used to test methods in order to verify that they work properly.
 
-Customers
-
-Customers should be able to view a list of stores to select a message recipient. Selecting a store will send a message to the seller associated with that store. 
-Customers should be able to search for a specific seller to message. 
-
-Selections
-
-Files
-
-All file imports must occur as a prompt to enter the file path.  
-Users can export details for one or more of their conversations using a csv file.
-All message details should be preserved: Participants, Message sender, timestamp, and contents.
-Users can import a text file (.txt) to an existing conversation.
-The file text will be sent as a message to the recipient. 
-
-Statistics
-
-Sellers can view a dashboard that lists statistics for each of their stores.
-Data will include a list of customers with the number of messages they have sent and the most common words in overall messages. 
-
-Sellers can choose to sort the dashboard.
-
-Customers can view a dashboard with store and seller information.
-Data will include a list of stores by number of messages received and a list of stores by the number of messages that particular customer has sent. 
-Customers can choose to sort the dashboard. 
-
-Blocking
-
-Users may choose to block another user or become invisible to them.
-An individual who has been blocked by another user may not send messages to the one who blocked them. 
-An individual who has become invisible to another user will not appear on the application when the other user searches for them. 
-
-Optional Features: 
-
-Notify users of new messages when they log in. Move conversations with new messages to the top of the conversation history. 
-Add an elective filtering mode where users can specify words or phrases they wish to be censored in their personal view. Users may enter replacement phrases or use a default **** to replace the text they wish to avoid. Filters are user-specific, one user's filter will not affect any other user. 
-Users may create a special form of message as a disappearing conversation. Conversations in this mode will have no history, a message will disappear immediately after the recipient reads it. 
+Output.java: This is a class that is used to print debugging statements to verify that each method is functioning as intended. The boolean "debugMode" should be set to false so that text used for debugging is not printed to the console by submission time. 
