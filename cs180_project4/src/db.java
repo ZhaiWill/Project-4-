@@ -1,6 +1,6 @@
 import java.io.*;
+import java.nio.file.Files;
 import java.util.Arrays;
-
 
 public class db {
     private static String root = "storage";
@@ -276,15 +276,19 @@ public class db {
         return !messageFile.exists();
     }
     public static Store saveStore(Store store) {
-        String dirPath = "storage/stores/" + store.getName() + ".store";
-        
+        if (db.readStoreFromFile(store.getName()) != null) {
+            output.debugPrint("Stores cannot have the same name");
+            return null;
+        }
+        String dirPath = "storage/stores/" + store.getName() + "/";
+        String filePath = dirPath + store.getName() + ".storeInfo";
         createDirectory(dirPath);
 
-        try (FileOutputStream fileOutputStream = new FileOutputStream(dirPath); 
+        try (FileOutputStream fileOutputStream = new FileOutputStream(filePath); 
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream)) {
 
             objectOutputStream.writeObject(store);
-            output.debugPrint("User serialized and saved to " + store + ".store");
+            output.debugPrint("Store serialized and saved to " + store.getName() + ".storeInfo");
         } catch (IOException e) {
             output.debugPrint("Failed to save user to " + dirPath);
             output.debugPrint(Arrays.toString(e.getStackTrace()));
@@ -297,7 +301,7 @@ public class db {
         String itemName = item.getName();
         String storeName = store.getName();
         
-        String storeDirPath = root + "/stores/" + storeName + ".store";
+        String storeDirPath = root + "/stores/" + storeName;
 
         createDirectory(storeDirPath);
 
@@ -316,10 +320,22 @@ public class db {
         return item;
     }
 
-    public static boolean removeStore(Store store) {
-        String storeDirPath = root + "/stores/" + store.getName() + ".store";
+    public static void deleteDir(File file) {
+        File[] contents = file.listFiles();
+        if (contents != null) {
+            for (File f : contents) {
+                if (! Files.isSymbolicLink(f.toPath())) {
+                deleteDir(f);
+                }
+            }
+        }
+        file.delete();
+    }
+
+    public static boolean removeStore(String storeName) {
+        String storeDirPath = root + "/stores/" + storeName;
         File f = new File(storeDirPath);
-        f.delete();
+        deleteDir(f);
         return true;
     }
     
@@ -327,7 +343,7 @@ public class db {
         String itemName = item.getName();
         String storeName = store.getName();
         
-        String storeDirPath = root + "/stores/" + storeName + ".store";
+        String storeDirPath = root + "/stores/" + storeName;
         String itemFilePath = storeDirPath + "/" + itemName + ".item";
 
         File f = new File(itemFilePath);
@@ -339,7 +355,7 @@ public class db {
         
         String storeName = store.getName();
         
-        String storeDirPath = root + "/stores/" + storeName + ".store";
+        String storeDirPath = root + "/stores/" + storeName;
         String itemFilePath = storeDirPath + "/" + itemName + ".item";
         
         try (FileInputStream fileInputStream = new FileInputStream(itemFilePath);
@@ -348,7 +364,25 @@ public class db {
             Item newItem = (Item) objectInputStream.readObject();
             output.debugPrint("Message deserialized from " + itemFilePath);
             return newItem;
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (Exception e) {
+            output.debugPrint("Failed to get message from " + itemFilePath);
+            output.debugPrint(Arrays.toString(e.getStackTrace()));
+            return null;
+        }
+    }
+
+    public static Store readStoreFromFile(String storeName){
+        
+        String storeDirPath = root + "/stores/" + storeName;
+        String itemFilePath = storeDirPath + "/" + storeName + ".storeInfo";
+        
+        try (FileInputStream fileInputStream = new FileInputStream(itemFilePath);
+             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
+            
+            Store newStore = (Store) objectInputStream.readObject();
+            output.debugPrint("Message deserialized from " + itemFilePath);
+            return newStore;
+        } catch (Exception e) {
             output.debugPrint("Failed to get message from " + itemFilePath);
             output.debugPrint(Arrays.toString(e.getStackTrace()));
             return null;

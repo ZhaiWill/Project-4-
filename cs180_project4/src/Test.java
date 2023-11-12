@@ -1,3 +1,5 @@
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class Test {
@@ -29,13 +31,13 @@ public class Test {
         items.add(item);
 
         Store store = new Store("storename", user2, items);
-        Store store2 = new Store("storename2", user2, items);
+        Store store2 = new Store("storename", user2, items);
         db.saveStore(store);
         db.saveStore(store2);
-        db.saveItem(store, item);
-
+        db.saveItem(store2, item);
         db.restockItem(store, "itemname", 2);
         db.buyItem(store, "itemname", 56);
         System.out.println("TEST: " + db.readItemFromFile(store,"itemname"));
+        System.out.println(db.readStoreFromFile("storename"));
     }
 }
