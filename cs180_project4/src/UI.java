@@ -37,14 +37,14 @@ public class UI {
                 case 1 -> viewConversationsMenu();
                 case 2 -> blockUsersMenu();
                 case 3 -> findAlternateUsersMenu();
-                case 4-> manageStoresMenu();
+                case 4 -> manageStoresMenu();
             }
         }
     }
 
     private void manageStoresMenu() {
         //print menu asking if you want to view stored you own or make a new store
-        switch(generateMenu(new String[]{"View Stores", "Create a new Store"})){
+        switch (generateMenu(new String[]{"View Stores", "Create a new Store"})) {
             case 0 -> viewStoresMenu();
             case 1 -> createNewStoreMenu();
         }
@@ -54,7 +54,7 @@ public class UI {
     private void createNewStoreMenu() {
         String storeName = queryValue("What would you like to name your store?", true);
         Store newStore = new Store(storeName, this.loggedInUser.username);
-        if(db.readStoreFromFile(storeName) != null){
+        if (db.readStoreFromFile(storeName) != null) {
             System.out.println("Sorry, a store with that name already exists");
             pressEnterToContinue();
             return;
@@ -93,8 +93,7 @@ public class UI {
 
         if (queryYesNo("Would you like to message one?")) {
             System.out.println("What store # would you like to message?");
-            int storeNumber = scan.nextInt();
-            scan.nextLine();
+            int storeNumber = getIntegerValue(0, stores.size() - 1);
             sendMessageFinalMenu(db.getUser(stores.get(storeNumber).OwnerUserName));
         }
     }
@@ -217,8 +216,7 @@ public class UI {
 
     private void deleteMessageMenu(ArrayList<Message> messages) {
         System.out.println("What message number would you like to delete?");
-        int messageNumber = scan.nextInt();
-        scan.nextLine();
+        int messageNumber = getIntegerValue(0, messages.size() - 1);
         Message m = messages.get(messageNumber);
 
         db.deleteMessage(this.loggedInUser, m);
@@ -228,8 +226,7 @@ public class UI {
 
     private void editMessageMenu(ArrayList<Message> messages) {
         System.out.println("What message number would you like to edit?");
-        int messageNumber = scan.nextInt();
-        scan.nextLine();
+        int messageNumber = getIntegerValue(0, messages.size() - 1);
         Message m = messages.get(messageNumber);
         if (!Objects.equals(m.sender.username, this.loggedInUser.username)) {
             System.out.println("You can not edit a message that you did not send");
@@ -342,25 +339,56 @@ public class UI {
         for (int i = 0; i < choices.length; i++) {
             System.out.println(i + ": " + choices[i]);
         }
-        int res = scan.nextInt();
-        scan.nextLine();
-        return res;
+
+        return getIntegerValue(0, choices.length - 1);
     }
 
 
     public String queryValue(String query, boolean customPhrase) {
         if (!customPhrase) System.out.println("Please enter the following: (" + query + ")");
         else System.out.println(query);
-        return scan.nextLine();
+        //ensure that input is alphanumeric
+
+        return getAlphaNumericValue();
     }
 
     public boolean queryYesNo(String query) {
         System.out.println(query + " (Y/N):");
-        return scan.nextLine().toLowerCase().startsWith("y");
+        return getAlphaNumericValue().toLowerCase().startsWith("y");
     }
 
     public void pressEnterToContinue() {
         System.out.println("Press Enter to continue");
         scan.nextLine();
+    }
+
+    public int getIntegerValue(int min, int max) {
+        Integer res = null;
+        while (res == null) {
+            try {
+                res = Integer.valueOf(scan.nextLine());
+            } catch (Exception ignored) {
+                System.out.println("Please enter a valid integer");
+                continue;
+            }
+            if (res < min || res > max) {
+                System.out.println("Please enter an integer between " + min + " and " + max + " inclusive");
+                res = null;
+                continue;
+            }
+        }
+        return res;
+    }
+    public String getAlphaNumericValue(){
+        String res = null;
+        while (res == null) {
+            res = scan.nextLine();
+            if (!res.matches("[a-zA-Z0-9]+")) {
+                System.out.println("Please enter a valid alphanumeric string");
+                res = null;
+                continue;
+            }
+        }
+        return res;
     }
 }
