@@ -148,9 +148,8 @@ public class UI {
     }
 
     public String getMessageContents() {
-        if(queryYesNo("Would you like to send the message from a file?")){
-            String res =newMessageContentsFILE();
-            
+        if (queryYesNo("Would you like to send the message from a file?")) {
+            String res = newMessageContentsFILE();
             return res;
         }
         return queryValue("What would you like the contents of the message to be?", true);
@@ -159,14 +158,14 @@ public class UI {
     public String newMessageContentsFILE() {
         String res = null;
         do {
-                try {
-                    File f = new File(queryValue("path to file", false));
-                    String fileContents = new String((Files.readAllBytes(f.toPath())));
-                    res = fileContents;
-                } catch (IOException ignored) {
-                    System.out.println("Sorry, we can not ready any file with that path");
-                    continue;
-                }
+            try {
+                File f = new File(queryValue("path to file", false));
+                String fileContents = new String((Files.readAllBytes(f.toPath())));
+                res = fileContents;
+            } catch (IOException ignored) {
+                System.out.println("Sorry, we can not ready any file with that path");
+                continue;
+            }
 
         } while (res == null);
         return res;
@@ -381,12 +380,13 @@ public class UI {
         }
         return res;
     }
+
     public String getStringValue() {
         String res = null;
         while (res == null) {
             res = scan.nextLine();
             if (!isValidString(res)) {
-                System.out.println("Please enter a valid string with only letters, periods, and /");
+                System.out.println("Please enter a valid string with only letters, periods, /, and @");
                 res = null;
             }
         }
@@ -396,7 +396,7 @@ public class UI {
     private boolean isValidString(String input) {
         // Check if the input contains only letters, periods, and /
         for (char c : input.toCharArray()) {
-            if (!Character.isLetter(c) && !Character.isDigit(c) && c != '.' && c != '/') {
+            if (!Character.isLetter(c) && !Character.isDigit(c) && c != '.' && c != '/' && c != '@') {
                 return false;
             }
         }
