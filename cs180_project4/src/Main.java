@@ -194,17 +194,20 @@ public class Main {
         }
     }
     public static void main(String[] args) {
-        //ALL TESTS ARE NOW IN TEST.JAVA SO WE CAN START IMPLEMENTING MAIN METHOD
+        // ALL TESTS ARE NOW IN TEST.JAVA SO WE CAN START IMPLEMENTING MAIN METHOD
         Scanner s = new Scanner(System.in);
         int choice = openingPrompt(s);
         User thisUser;
         if (choice == 1) {
             thisUser = loginToAccount(s);
-            menuSystem(s, thisUser);
+            if (thisUser.isType() == userType.SELLER) {
+               initMenuSeller(s, thisUser);
+            } else {
+                initMenuBuyer(s, thisUser);
+            }
         } else {
             thisUser = createAccount(s);
-            menuSystem(s, thisUser);
         }
-        sendMessage(s,thisUser);
+        sendMessage(s,thisUser);  
     }
 }
