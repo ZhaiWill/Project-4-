@@ -254,7 +254,7 @@ public class db {
         }
     }
 
-    public static boolean removeMessage(User user, Message message) {
+    public static boolean deleteMessage(User user, Message message) {
         String uuid = message.getUuid().toString();
         boolean isDeleterSender = user.username.equals(message.getSender().username);
         String filepath = root + "/messages/";
@@ -386,19 +386,19 @@ public class db {
 
     //handling stores and all that stuff
     public static Store saveStore(Store store) {
-        if (db.readStoreFromFile(store.getName()) != null) {
+        if (db.readStoreFromFile(store.getStoreName()) != null) {
             output.debugPrint("Stores cannot have the same name");
             return null;
         }
-        String dirPath = "storage/stores/" + store.getName() + "/";
-        String filePath = dirPath + store.getName() + ".storeInfo";
+        String dirPath = "storage/stores/";
+        String filePath = dirPath + store.getStoreName() + ".storeInfo";
         createDirectory(dirPath);
 
         try (FileOutputStream fileOutputStream = new FileOutputStream(filePath);
              ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream)) {
 
             objectOutputStream.writeObject(store);
-            output.debugPrint("Store serialized and saved to " + store.getName() + ".storeInfo");
+            output.debugPrint("Store serialized and saved to " + store.getStoreName() + ".storeInfo");
         } catch (IOException e) {
             output.debugPrint("Failed to save user to " + dirPath);
             output.debugPrint(Arrays.toString(e.getStackTrace()));
@@ -407,30 +407,6 @@ public class db {
         return store;
     }
 
-    public static Item saveItem(Store store, Item item) {
-        String itemName = item.getName();
-        String storeName = store.getName();
-
-        String storeDirPath = root + "/stores/" + storeName;
-
-        createDirectory(storeDirPath);
-
-        String itemFilePath = storeDirPath + "/" + itemName + ".item";
-
-        try (FileOutputStream senderOutputStream = new FileOutputStream(itemFilePath);
-             ObjectOutputStream senderObjectOutputStream = new ObjectOutputStream(senderOutputStream)) {
-
-            senderObjectOutputStream.writeObject(item);
-            output.debugPrint("Wrote object to " + itemFilePath);
-        } catch (IOException e) {
-            output.debugPrint("Failed to write item to " + itemFilePath);
-            output.debugPrint(Arrays.toString(e.getStackTrace()));
-            return null;
-        }
-        return item;
-    }
-
-
     public static boolean removeStore(String storeName) {
         String storeDirPath = root + "/stores/" + storeName;
         File f = new File(storeDirPath);
@@ -438,48 +414,40 @@ public class db {
         return true;
     }
 
-    public static boolean removeItem(Store store, Item item) {
-        String itemName = item.getName();
-        String storeName = store.getName();
+    public static ArrayList<Store> getAllStores() {
+        ArrayList<Store> Stores = new ArrayList<>();
+        File storeDirectory = new File(root + "/stores");
+        if (storeDirectory.exists() && storeDirectory.isDirectory()) {
+            File[] userFiles = storeDirectory.listFiles();
 
-        String storeDirPath = root + "/stores/" + storeName;
-        String itemFilePath = storeDirPath + "/" + itemName + ".item";
+            if (userFiles != null) {
+                for (File userFile : userFiles) {
+                    try (FileInputStream fileInputStream = new FileInputStream(userFile);
+                         ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
 
-        File f = new File(itemFilePath);
-        f.delete();
-        return true;
-    }
-
-    public static Item readItemFromFile(Store store, String itemName) {
-
-        String storeName = store.getName();
-
-        String storeDirPath = root + "/stores/" + storeName;
-        String itemFilePath = storeDirPath + "/" + itemName + ".item";
-
-        try (FileInputStream fileInputStream = new FileInputStream(itemFilePath);
-             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
-
-            Item newItem = (Item) objectInputStream.readObject();
-            output.debugPrint("Message deserialized from " + itemFilePath);
-            return newItem;
-        } catch (Exception e) {
-            output.debugPrint("Failed to get message from " + itemFilePath);
-            output.debugPrint(Arrays.toString(e.getStackTrace()));
-            return null;
+                        Store store = (Store) objectInputStream.readObject();
+                        Stores.add(store);
+                    } catch (IOException | ClassNotFoundException e) {
+                        output.debugPrint("Failed to read store from " + userFile.getPath());
+                        output.debugPrint(Arrays.toString(e.getStackTrace()));
+                    }
+                }
+            }
         }
+
+        return Stores;
     }
 
     public static Store readStoreFromFile(String storeName) {
 
-        String storeDirPath = root + "/stores/" + storeName;
+        String storeDirPath = "storage/stores/";
         String itemFilePath = storeDirPath + "/" + storeName + ".storeInfo";
 
         try (FileInputStream fileInputStream = new FileInputStream(itemFilePath);
              ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
 
             Store newStore = (Store) objectInputStream.readObject();
-            output.debugPrint("Message deserialized from " + itemFilePath);
+            output.debugPrint("Store deserialized from " + itemFilePath);
             return newStore;
         } catch (Exception e) {
             output.debugPrint("Failed to get message from " + itemFilePath);
@@ -488,27 +456,4 @@ public class db {
         }
     }
 
-    public static boolean buyItem(Store store, String itemName, int quantity) {
-        Item item = readItemFromFile(store, itemName);
-        if (item.getQuantity() - quantity < 0) {
-            output.debugPrint("Cannot have items with quantity less than 0");
-            return false;
-        }
-        item.setQuantity(item.getQuantity() - quantity);
-        db.saveItem(store, item);
-        output.debugPrint("Bought item successfully");
-        return true;
-    }
-
-    public static boolean restockItem(Store store, String itemName, int quantity) {
-        Item item = readItemFromFile(store, itemName);
-        if (quantity <= 0) {
-            output.debugPrint("Cannot restock item with quantity less than or equal to zero");
-            return false;
-        }
-        item.setQuantity(item.getQuantity() + quantity);
-        db.saveItem(store, item);
-        output.debugPrint("Restocked item successfully");
-        return true;
-    }
 }

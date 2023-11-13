@@ -1,4 +1,3 @@
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,12 +20,97 @@ public class UI {
     }
 
     public void generateMainMenu() {
-        switch (generateMenu(new String[]{"Send a Message", "View Conversations", "Block/Unblock Users"})) {
-            case 0 -> sendMessageMenu();
-            case 1 -> viewConversationsMenu();
-            case 2 -> blockUsersMenu();
+
+        if (this.loggedInUser.type == userType.CUSTOMER) {
+            //CUSTOMER MENU
+            switch (generateMenu(new String[]{"Send a Message", "View Conversations", "Block/Unblock Users", "Find Sellers", "Find Stores",})) {
+                case 0 -> sendMessageMenu();
+                case 1 -> viewConversationsMenu();
+                case 2 -> blockUsersMenu();
+                case 3 -> findAlternateUsersMenu();
+                case 4 -> findStoresMenu();
+            }
+        } else {
+            //SELLER MENU
+            switch (generateMenu(new String[]{"Send a Message", "View Conversations", "Block/Unblock Users", "Find Customers", "Manage Store(s)",})) {
+                case 0 -> sendMessageMenu();
+                case 1 -> viewConversationsMenu();
+                case 2 -> blockUsersMenu();
+                case 3 -> findAlternateUsersMenu();
+                case 4-> manageStoresMenu();
+            }
         }
     }
+
+    private void manageStoresMenu() {
+        //print menu asking if you want to view stored you own or make a new store
+        switch(generateMenu(new String[]{"View Stores", "Create a new Store"})){
+            case 0 -> viewStoresMenu();
+            case 1 -> createNewStoreMenu();
+        }
+
+    }
+
+    private void createNewStoreMenu() {
+        String storeName = queryValue("What would you like to name your store?", true);
+        Store newStore = new Store(storeName, this.loggedInUser.username);
+        if(db.readStoreFromFile(storeName) != null){
+            System.out.println("Sorry, a store with that name already exists");
+            pressEnterToContinue();
+            return;
+        }
+        db.saveStore(newStore);
+        System.out.println("Successfully created store " + newStore.storeName);
+        pressEnterToContinue();
+    }
+
+    private void viewStoresMenu() {
+        ArrayList<Store> stores = db.getAllStores();
+        ArrayList<Store> storesOwnedByUser = new ArrayList<>();
+        for (Store store : stores) {
+            if (Objects.equals(store.OwnerUserName, this.loggedInUser.username)) {
+                storesOwnedByUser.add(store);
+            }
+        }
+        if (storesOwnedByUser.size() == 0) {
+            System.out.println("You currently have no stores");
+            pressEnterToContinue();
+            return;
+        }
+        for (Store store : storesOwnedByUser) {
+            System.out.println(store.storeName);
+        }
+        pressEnterToContinue();
+    }
+
+    private void findStoresMenu() {
+        System.out.println("Here is a list of stores you can message:");
+        ArrayList<Store> stores = this.loggedInUser.getAllAccessibleStores();
+        for (int i = 0; i < stores.size(); i++) {
+            Store store = stores.get(i);
+            System.out.println(i + ": " + store.storeName + " owned by " + store.OwnerUserName);
+        }
+
+        if (queryYesNo("Would you like to message one?")) {
+            System.out.println("What store # would you like to message?");
+            int storeNumber = scan.nextInt();
+            scan.nextLine();
+            sendMessageFinalMenu(db.getUser(stores.get(storeNumber).OwnerUserName));
+        }
+    }
+
+    private void findAlternateUsersMenu() {
+        System.out.println("Here is a list of " + (this.loggedInUser.type == userType.CUSTOMER ? "sellers" : "customers") + " you can message:");
+
+        for (User user : this.loggedInUser.getAllAccessibleUsers()) {
+            System.out.println(user.username);
+        }
+
+        if (queryYesNo("Would you like to message one?")) {
+            sendMessageMenu();
+        }
+    }
+
 
     public void sendMessageMenu() {
         User recipientUser = null;
@@ -44,12 +128,15 @@ public class UI {
 
             if (recipientUser.getUserBlockedStatus(this.loggedInUser) == userBlockStatus.BLOCKED) {
                 System.out.println("Sorry, you can not send messages to that user");
+                continue;
             }
             if (recipientUser.getUserBlockedStatus(this.loggedInUser) == userBlockStatus.INVISIBLE) {
                 System.out.println("Sorry, a user with that username does not exist");
+                continue;
             }
             if (this.loggedInUser.type == recipientUser.type) {
                 System.out.println("Sorry, you can not send messages to other " + (this.loggedInUser.type == userType.CUSTOMER ? "customers" : "sellers"));
+                continue;
             }
             sendMessageFinalMenu(recipientUser);
 
@@ -80,8 +167,7 @@ public class UI {
             } else {
                 res = queryValue("What is the message you would like to send?", true);
             }
-        }
-        while (res == null);
+        } while (res == null);
         return res;
     }
 
@@ -114,16 +200,30 @@ public class UI {
         }
         while (true) {
             pressEnterToContinue();
-            switch (generateMenu(new String[]{"return", "edit message", "delete message", "reply to conversation"})) {
+            switch (generateMenu(new String[]{"return", "edit message", "delete message"})) {
                 case 0 -> {
                     return;
                 }
                 case 1 -> {
                     editMessageMenu(messages);
                 }
+                case 2 -> {
+                    deleteMessageMenu(messages);
+                }
             }
 
         }
+    }
+
+    private void deleteMessageMenu(ArrayList<Message> messages) {
+        System.out.println("What message number would you like to delete?");
+        int messageNumber = scan.nextInt();
+        scan.nextLine();
+        Message m = messages.get(messageNumber);
+
+        db.deleteMessage(this.loggedInUser, m);
+        System.out.println("Successfully updated contents");
+
     }
 
     private void editMessageMenu(ArrayList<Message> messages) {
@@ -158,6 +258,7 @@ public class UI {
                     }
                     boolean invisibleModeBlock = queryYesNo(("Would you like to block this user in invisible mode?"));
                     this.loggedInUser.setUserBlockStatus(user.username, invisibleModeBlock ? userBlockStatus.INVISIBLE : userBlockStatus.BLOCKED);
+                    db.saveUser(this.loggedInUser);
                 }
                 case 1 -> {
                     System.out.println("Who would you like to unblock?");

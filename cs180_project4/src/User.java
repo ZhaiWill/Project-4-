@@ -93,13 +93,27 @@ public class User implements Serializable {
         ArrayList<User> accessibleUsers = new ArrayList<>();
 
         for (User user : db.getAllUsers()) {
-            if (this.getUserBlockedStatus(user) != userBlockStatus.INVISIBLE && (this.type != user.type)) {
+            if (user.getUserBlockedStatus(this) != userBlockStatus.INVISIBLE && (this.type != user.type)) {
                 accessibleUsers.add(user);
             }
         }
 
         return accessibleUsers;
     }
+    public ArrayList<Store> getAllAccessibleStores() {
+        //return all users that have getUserBlockedStatus return type of ALLOWED
+        ArrayList<Store> accessibleStores = new ArrayList<>();
+
+        for (Store store : db.getAllStores()) {
+            User storeOwner =db.getUser(store.getownerUserName());
+            if (storeOwner.getUserBlockedStatus(this) != userBlockStatus.INVISIBLE && (this.type != storeOwner.type)) {
+                accessibleStores.add(store);
+            }
+        }
+
+        return accessibleStores;
+    }
+
 
     public ArrayList<String> getAllAccessibleConversations() {
         ArrayList<User> allConversations = db.getAllConversations(this);
@@ -117,6 +131,8 @@ public class User implements Serializable {
 
         return uniqueAccessibleConversations;
     }
+
+
 
 
 }
