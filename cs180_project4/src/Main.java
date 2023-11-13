@@ -64,7 +64,7 @@ public class Main {
     public static void initMenuSeller(Scanner s, User user) {
         boolean repeat = true;
         System.out.println("1. Read all messages\n2. Send message\n3. Manage account\n" +
-                            "4. Manage stores\n5. View statistics\n6. Manage messages\n7. Exit");
+                            "4. Manage stores\n5. Block User\n6. Become Invisible\n7. Manage messages\n8. Exit");
         while (repeat) {
             int input = s.nextInt();
             switch (input) {
@@ -73,9 +73,10 @@ public class Main {
                 case 2 -> sendMessage(s,user);
                 case 3 -> System.out.println(input);
                 case 4 -> System.out.println(input);
-                case 5 -> System.out.println(input);
-                case 6 -> System.out.println(input);
-                case 7 -> repeat = false;
+                case 5 -> block(s, user);
+                case 6 -> invisible(s, user);
+                case 7 -> System.out.println(input);
+                case 8 -> repeat = false;
                 default -> System.out.println("Error! Invalid input");
             }
         }
@@ -84,7 +85,7 @@ public class Main {
     public static void initMenuBuyer(Scanner s, User user) {
         boolean repeat = true;
         System.out.println("1. Read all messages\n2. Send message\n3. Manage messages\n" +
-                            "4. Browse stores\n5. View statistics\n6. Manage account\n7. Exit");
+                            "4. Browse stores\n5. Block User\n6. Become Invisible\n7. Manage account\n8. Exit");
         while (repeat) {
             int input = s.nextInt();
             switch (input) {
@@ -93,9 +94,10 @@ public class Main {
                 case 2 -> sendMessage(s,user);
                 case 3 -> System.out.println(input);
                 case 4 -> System.out.println(input);
-                case 5 -> System.out.println(input);
-                case 6 -> System.out.println(input);
-                case 7 -> repeat = false;
+                case 5 -> block(s, user);
+                case 6 -> invisible(s, user);
+                case 7 -> System.out.println(input);
+                case 8 -> repeat = false;
                 default -> System.out.println("Error! Invalid input");
             }
         }
@@ -130,6 +132,34 @@ public class Main {
             }
         } 
     }
+    public static void block(Scanner s, User thisUser) {
+        boolean repeat = true;
+        System.out.print("What would you like to do?");
+        System.out.println("1. Block a user\n2. Unblock a user\n3. Exit");
+        while (repeat) {
+            int input = s.nextInt();
+            switch (input) {
+                case 1 -> blockPrompt(s,thisUser);
+                case 2 -> unblockPrompt(s, thisUser);
+                case 3 -> repeat = false;
+                default -> System.out.println("Error! Invalid input");
+            }
+        }
+    }
+    public static void invisible(Scanner s, User thisUser) {
+        boolean repeat = true;
+        System.out.print("What would you like to do?");
+        System.out.println("1. Become invisible to a user\n2. Become uninvisible to a user\n3. Exit");
+        while (repeat) {
+            int input = s.nextInt();
+            switch (input) {
+                case 1 -> invisiblePrompt(s,thisUser);
+                case 2 -> uninvisiblePrompt(s, thisUser);
+                case 3 -> repeat = false;
+                default -> System.out.println("Error! Invalid input");
+            }
+        }
+    }
     public static void blockPrompt(Scanner s, User thisUser) {
         System.out.println("Enter the username of who you would like to block");
         String blockedUser = s.nextLine();
@@ -142,13 +172,13 @@ public class Main {
         User unblockerUser1 = db.getUser(unblockedUser);
         thisUser.unblockUser(unblockerUser1);
     }
-    public static void InvisiblePrompt(Scanner s, User thisUser) {
+    public static void invisiblePrompt(Scanner s, User thisUser) {
         System.out.println("Enter the username of who you would like to become invisible to");
         String invisibleUser = s.nextLine();
         User invisibleUser1 = db.getUser(invisibleUser);
         thisUser.becomeInvisible(invisibleUser1);
     }
-    public static void unInvisiblePrompt(Scanner s, User thisUser) {
+    public static void uninvisiblePrompt(Scanner s, User thisUser) {
         System.out.println("Enter the username of who you would like to become uninvisible to");
         String uninvisibleUser = s.nextLine();
         User uninvisibleUser1 = db.getUser(uninvisibleUser);
