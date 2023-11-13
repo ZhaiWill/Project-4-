@@ -122,11 +122,19 @@ public class Main {
         db.initializeDatabase();
         User bob = User.createUser(userType.CUSTOMER, "bob", "123", "1@gmai.com");
         User joe = User.createUser(userType.SELLER, "joe", "123", "2@gmai.com");
+        User andy = User.createUser(userType.SELLER, "andy", "123", "2@gmai.com");
         assert bob != null;
+        assert andy != null;
         assert joe != null;
-//        bob.sendmessage(joe, "hi");
-//        joe.sendmessage(bob, "hello");
-//        bob.sendmessage(joe, "how are you");
+        bob.sendmessage(joe, "hi");
+        joe.sendmessage(bob, "hello");
+        bob.sendmessage(joe, "how are you");
+
+        bob.setUserBlockStatus("andy", userBlockStatus.BLOCKED);
+        bob.setUserBlockStatus("joe", userBlockStatus.INVISIBLE);
+        db.saveUser(bob);
+//        System.out.println(bob.userBlockStatusMap);
+//        System.out.println(db.getUser("bob").userBlockStatusMap);
         new UI().run();
     }
 }

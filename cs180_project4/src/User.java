@@ -106,7 +106,7 @@ public class User implements Serializable {
         ArrayList<String> accessibleConversations = new ArrayList<>();
 
         for (User user : allConversations) {
-            if (this.getUserBlockedStatus(user) != userBlockStatus.INVISIBLE && (this.type != user.type)) {
+            if (user.getUserBlockedStatus(this) != userBlockStatus.INVISIBLE && (this.type != user.type)) {
                 accessibleConversations.add(user.username);
             }
         }

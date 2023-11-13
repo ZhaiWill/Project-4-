@@ -2,9 +2,7 @@
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class UI {
 
@@ -23,9 +21,10 @@ public class UI {
     }
 
     public void generateMainMenu() {
-        switch (generateMenu(new String[]{"Send a Message", "View Conversations"})) {
+        switch (generateMenu(new String[]{"Send a Message", "View Conversations", "Block/Unblock Users"})) {
             case 0 -> sendMessageMenu();
             case 1 -> viewConversationsMenu();
+            case 2 -> blockUsersMenu();
         }
     }
 
@@ -81,6 +80,7 @@ public class UI {
         List<String> userConvoList = loggedInUser.getAllAccessibleConversations();
         if (userConvoList.size() == 0) {
             System.out.println("You currently have no conversations");
+            pressEnterToContinue();
             return;
         }
         System.out.println("What conversation would you like to see?");
@@ -101,8 +101,62 @@ public class UI {
             res += m.contents;
             System.out.println(res);
         }
-        System.out.println("Press Enter to continue");
-        scan.nextLine();
+        pressEnterToContinue();
+
+    }
+
+
+    public void blockUsersMenu() {
+        while (true) {
+            switch (generateMenu(new String[]{"Block a user", "Unblock a user", "See users you have blocked", "return"})) {
+                case 0 -> {
+                    System.out.println("Who would you like to block?");
+                    String username = queryValue("username", false);
+                    User user = db.getUser(username);
+                    if (user == null) {
+                        System.out.println("Sorry, a user with that username does not exist");
+                        continue;
+                    }
+                    if (Objects.equals(user.username, this.loggedInUser.username)) {
+                        System.out.println("You can not block yourself");
+                        continue;
+                    }
+                    boolean invisibleModeBlock = queryYesNo(("Would you like to block this user in invisible mode?"));
+                    this.loggedInUser.setUserBlockStatus(user.username, invisibleModeBlock ? userBlockStatus.INVISIBLE : userBlockStatus.BLOCKED);
+                }
+                case 1 -> {
+                    System.out.println("Who would you like to unblock?");
+                    String username = queryValue("username", false);
+                    User user = db.getUser(username);
+                    if (user == null) {
+                        System.out.println("Sorry, a user with that username does not exist");
+                        continue;
+                    }
+                    if (Objects.equals(user.username, this.loggedInUser.username)) {
+                        System.out.println("You can not unblock yourself");
+                        continue;
+                    }
+                    if (this.loggedInUser.getUserBlockedStatus(user) == userBlockStatus.ALLOWED) {
+                        System.out.println("That user is not blocked");
+                        continue;
+                    }
+                    this.loggedInUser.setUserBlockStatus(user.username, userBlockStatus.ALLOWED);
+                }
+                case 2 -> {
+                    Map<String, userBlockStatus> stringuserBlockStatusMap = this.loggedInUser.userBlockStatusMap;
+                    System.out.println("You have blocked the following users:");
+                    for (Map.Entry<String, userBlockStatus> entry : stringuserBlockStatusMap.entrySet()) {
+                        if (entry.getValue() == userBlockStatus.BLOCKED || entry.getValue() == userBlockStatus.INVISIBLE) {
+                            System.out.println(entry.getKey() + " is blocked" + (entry.getValue() == userBlockStatus.INVISIBLE ? " (invisible)" : ""));
+                        }
+                    }
+                }
+                case 3 -> {
+                    return;
+                }
+            }
+            pressEnterToContinue();
+        }
     }
 
 
@@ -169,4 +223,8 @@ public class UI {
         return scan.nextLine().toLowerCase().startsWith("y");
     }
 
+    public void pressEnterToContinue() {
+        System.out.println("Press Enter to continue");
+        scan.nextLine();
+    }
 }
