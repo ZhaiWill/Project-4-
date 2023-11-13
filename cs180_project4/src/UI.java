@@ -48,14 +48,24 @@ public class UI {
             if (recipientUser.getUserBlockedStatus(this.loggedInUser) == userBlockStatus.INVISIBLE) {
                 System.out.println("Sorry, a user with that username does not exist");
             }
-
-            String message = queryValue("What would you like to send?", true);
-            this.loggedInUser.sendmessage(recipientUser, message);
+            if (this.loggedInUser.type == recipientUser.type) {
+                System.out.println("Sorry, you can not send messages to other " + (this.loggedInUser.type == userType.CUSTOMER ? "customers" : "sellers"));
+            }
+            sendMessageFinalMenu(recipientUser);
 
         }
     }
 
-    public String newMessageContents() {
+    public void sendMessageFinalMenu(User recipientUser) {
+
+        this.loggedInUser.sendmessage(recipientUser, getMessageContents());
+    }
+
+    public String getMessageContents() {
+        return queryValue("What would you like the contents of the message to be?", true);
+    }
+
+    public String newMessageContentsFILE() {
         String res = null;
         do {
             if (queryYesNo("Would you like to import a file as your message?")) {
@@ -94,6 +104,7 @@ public class UI {
         for (int i = 0; i < messages.size(); i++) {
             Message m = messages.get(i);
             String res = "";
+            res += i + ": ";
             res += m.getTimestamp();
             res += ": ";
             res += m.sender.username;
@@ -101,7 +112,31 @@ public class UI {
             res += m.contents;
             System.out.println(res);
         }
-        pressEnterToContinue();
+        while (true) {
+            pressEnterToContinue();
+            switch (generateMenu(new String[]{"return", "edit message", "delete message", "reply to conversation"})) {
+                case 0 -> {
+                    return;
+                }
+                case 1 -> {
+                    editMessageMenu(messages);
+                }
+            }
+
+        }
+    }
+
+    private void editMessageMenu(ArrayList<Message> messages) {
+        System.out.println("What message number would you like to edit?");
+        int messageNumber = scan.nextInt();
+        scan.nextLine();
+        Message m = messages.get(messageNumber);
+        if (!Objects.equals(m.sender.username, this.loggedInUser.username)) {
+            System.out.println("You can not edit a message that you did not send");
+            return;
+        }
+        db.editMessage(m, getMessageContents());
+        System.out.println("Successfully updated contents");
 
     }
 
