@@ -259,39 +259,15 @@ public class db {
         try {
             File f1 = new File(filePath1);
             File[] f1Array = f1.listFiles();
-            String[] f1StringsArray = new String[f1Array.length]; 
-            int num = 0;
-            for (File f : f1Array) {
-                String name = f.getName();
-                int index = name.lastIndexOf("/");
-                String substring = name.substring(index + 1);
-                f1StringsArray[num] = substring;
-                num++; // stringarrays will contain all the uuids
-            }
-            num = 0;
+            Message[] f1MessageArray = new Message[f1Array.length];
             File f2 = new File(filePath2);
             File[] f2Array = f2.listFiles();
-            String[] f2StringsArray = new String[f2Array.length];
-            for (File f :f2Array) {
-                String name = f.getName();
-                int index = name.lastIndexOf("/");
-                String substring = name.substring(index + 1);
-                f1StringsArray[num] = substring;
-                num++;
-            }
-            Message[] f1MessageArray = new Message[f1StringsArray.length];
-            num = 0;
-            for (String s : f1StringsArray) {
-                Message m = getMessage(s);
-                f1MessageArray[num] = m;
-                num++;
-            }
-            num = 0;
-            Message[] f2MessageArray = new Message[f2StringsArray.length];
-            for (String s : f2StringsArray) {
-                Message m = getMessage(s);
-                f2MessageArray[num] = m;
-                num++;
+            Message[] f2MessageArray = new Message[f2Array.length];
+            for (int i = 0; i < f1Array.length; i++) {
+                Message m1 = readMessageFromFile(f1Array[i].getName());
+                Message m2 = readMessageFromFile(f2Array[i].getName());
+                f1MessageArray[i] = m1;
+                f2MessageArray[i] = m2;
             }
             messageLog.add(f1MessageArray[0]);
             boolean added = false;
@@ -329,23 +305,6 @@ public class db {
             e.printStackTrace();
         }
         return messageLog;
-    }
-    
-    public Message fileToMessage(File f, User user1, User user2) { // assume fileName contains storage/message/, user1, and user2
-        String fileName = f.getName();
-        if (fileName.indexOf("storage/messages/") == -1) {
-            return null;
-        }
-        if (fileName.indexOf(user1.getUsername()) == -1) {
-            return null;
-        }
-        if (fileName.indexOf(user2.getUsername()) == -1) {
-            return null;
-        }
-        int index = fileName.lastIndexOf("/");
-        String fileUUID = fileName.substring(index + 1);
-        Message m = getMessage(fileUUID);
-        return m;
     }
     
     //HELPER METHODS
