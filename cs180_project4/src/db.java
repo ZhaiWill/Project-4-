@@ -258,7 +258,7 @@ public class db {
         String receivedName = fileName + "/received/";
         String sentName = fileName + "/sent/";
         try {
-            File f = new File(root + "/messages?");
+            File f = new File(root + "/messages/");
             File[] files = f.listFiles();
             for (File thing : files) {
                 int index = thing.getPath().indexOf(receivedName);
