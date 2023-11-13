@@ -134,6 +134,42 @@ public class Main {
             }
         } 
     }
+    
+    public static void readMessages(Scanner s, User receiver) {
+        while (true) {
+            ArrayList<User> correspondents = db.getAllCorrespondents(receiver);
+            System.out.println("Which User's messages would you like to read?");
+            for (User u : correspondents) {
+                System.out.println(u.getUsername());
+            }
+            String input = s.nextLine();
+            boolean found = false;
+            for (User u : correspondents) {
+                if (u.getUsername().equals(input)) {
+                    found = true;
+                    ArrayList<Message> messages = db.findAllMessages(receiver, u);
+                    for (Message m : messages) {
+                        System.out.println(m.toString()); //maybe make it more readable
+                    }
+                }
+            }
+            if (!found) {
+                System.out.println("Sorry, you don't have correspondence with that User yet.");
+            }
+            while (true) {
+                System.out.println("Continue reading messages? (Y or N)");
+                input = s.nextLine();
+                if (input.toLowerCase().equals("y")) {
+                    continue;
+                } else if (input.toLowerCase().equals("n")) {
+                    break;
+                } else {
+                    System.out.println("type Y or N.");
+                }
+            }
+        }
+    }
+    
     public static void block(Scanner s, User thisUser) {
         boolean repeat = true;
         System.out.print("What would you like to do?");
@@ -148,6 +184,7 @@ public class Main {
             }
         }
     }
+    
     public static void invisible(Scanner s, User thisUser) {
         boolean repeat = true;
         System.out.print("What would you like to do?");
