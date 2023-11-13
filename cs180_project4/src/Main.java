@@ -17,6 +17,7 @@ public class Main {
     }
     public static User createAccount(Scanner s) {
         System.out.println("Enter your new username: ");
+        s.nextLine();
         String newUsername = s.nextLine();
         System.out.println( "Enter your password:");
         String newPassword = s.nextLine();
@@ -41,6 +42,7 @@ public class Main {
 
     public static User loginToAccount(Scanner s) { // to log into an existing account
         System.out.println("Please enter your username:");
+        s.nextLine();
             while (true) {
             String username = s.nextLine();
             User user = db.getUser(username);
@@ -184,6 +186,13 @@ public class Main {
         User uninvisibleUser1 = db.getUser(uninvisibleUser);
         thisUser.becomeUninvisible(uninvisibleUser1);
     }
+    public static void menuSystem(Scanner s, User user){
+        if (user.type.equals(userType.CUSTOMER)){
+            initMenuSeller(s, user);
+        } else {
+            initMenuBuyer(s, user);
+        }
+    }
     public static void main(String[] args) {
         //ALL TESTS ARE NOW IN TEST.JAVA SO WE CAN START IMPLEMENTING MAIN METHOD
         Scanner s = new Scanner(System.in);
@@ -191,8 +200,10 @@ public class Main {
         User thisUser;
         if (choice == 1) {
             thisUser = loginToAccount(s);
+            menuSystem(s, thisUser);
         } else {
             thisUser = createAccount(s);
+            menuSystem(s, thisUser);
         }
         sendMessage(s,thisUser);
     }
