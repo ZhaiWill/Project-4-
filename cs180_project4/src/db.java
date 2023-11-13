@@ -252,6 +252,40 @@ public class db {
         return true;
     }
 
+    public static ArrayList<User> getAllCorrespondents(User u) { //returns an arraylist of all people who have sent a message to u
+        ArrayList<User> correspondents = new ArrayList<User>();
+        String fileName = root + "/messages/" + u.getUsername();
+        String receivedName = fileName + "/received/";
+        String sentName = fileName + "/sent/";
+        try {
+            File f = new File(root + "/messages?");
+            File[] files = f.listFiles();
+            for (File thing : files) {
+                int index = thing.getPath().indexOf(receivedName);
+                if (index != -1) {
+                    String otherUser = thing.getPath();
+                    if (correspondents.indexOf(otherUser) != -1) {
+                        correspondents.add(getUser(otherUser));
+                    }
+                }
+            }
+            for (File thing : files) {
+                int index = thing.getPath().indexOf(sentName);
+                if (index != -1) {
+                    String otherUser = thing.getPath();
+                    if (correspondents.indexOf(otherUser) != -1) {
+                        correspondents.add(getUser(otherUser));
+                    }
+                }
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return correspondents;
+    }
+
     public static ArrayList<Message> findAllMessages(User user1, User user2) { // returns all messages between user1 and user2 in order
         ArrayList<Message> messageLog = new ArrayList<Message>();
         String username1 = user1.getUsername();
