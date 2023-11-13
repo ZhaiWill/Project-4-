@@ -117,15 +117,17 @@ public class Main {
         } 
     }
     public static void main(String[] args) {
+//        db.initializeDatabase();
+        new UI().run();
         //ALL TESTS ARE NOW IN TEST.JAVA SO WE CAN START IMPLEMENTING MAIN METHOD
-        Scanner s = new Scanner(System.in);
-        int choice = openingPrompt(s);
-        User thisUser;
-        if (choice == 1) {
-            thisUser = loginToAccount(s);
-        } else {
-            thisUser = createAccount(s);
-        }
-        sendMessage(s,thisUser);
+//        Scanner s = new Scanner(System.in);
+//        int choice = openingPrompt(s);
+//        User thisUser;
+//        if (choice == 1) {
+//            thisUser = loginToAccount(s);
+//        } else {
+//            thisUser = createAccount(s);
+//        }
+//        sendMessage(s,thisUser);
     }
 }
