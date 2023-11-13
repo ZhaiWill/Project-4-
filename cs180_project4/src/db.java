@@ -279,62 +279,6 @@ public class db {
         return correspondents;
     }
 
-    public static ArrayList<Message> findAllMessages(User user1, User user2) { // returns all messages between user1 and user2 in order
-        ArrayList<Message> messageLog = new ArrayList<Message>();
-        String username1 = user1.getUsername();
-        String username2 = user2.getUsername();
-        String filePath1 = "storage/messages" + username1 + "/sent/" + username2;
-        String filePath2 = "storage/messages" + username2 + "/sent/" + username1;
-        try {
-            File f1 = new File(filePath1);
-            File[] f1Array = f1.listFiles();
-            Message[] f1MessageArray = new Message[f1Array.length];
-            File f2 = new File(filePath2);
-            File[] f2Array = f2.listFiles();
-            Message[] f2MessageArray = new Message[f2Array.length];
-            for (int i = 0; i < f1Array.length; i++) {
-                Message m1 = readMessageFromFile(f1Array[i].getPath());
-                Message m2 = readMessageFromFile(f2Array[i].getPath());
-                f1MessageArray[i] = m1;
-                f2MessageArray[i] = m2;
-            }
-            messageLog.add(f1MessageArray[0]);
-            boolean added = false;
-            for (int i = 1; i < f1MessageArray.length; i++) { //sorting
-                Date ts = f1MessageArray[i].getTimestamp();
-                for (int j = 0; j < messageLog.size(); j++) {
-                    Date ts2 = messageLog.get(j).getTimestamp();
-                    if (ts.compareTo(ts2) > 0) {
-                        messageLog.add(j, f1MessageArray[i]);
-                        added = true;
-                    }
-                    if (!added) {
-                        messageLog.add(f1MessageArray[i]);
-                    }
-                    added = false;
-                }
-            }
-            for (int i = 1; i < f2MessageArray.length; i++) { //sorting
-                Date ts = f2MessageArray[i].getTimestamp();
-                for (int j = 0; j < messageLog.size(); j++) {
-                    Date ts2 = messageLog.get(j).getTimestamp();
-                    if (ts.compareTo(ts2) > 0) {// compareto > 0 when ts is before ts2
-                        messageLog.add(j, f2MessageArray[i]); // add it before whatever its before first
-                        added = true;
-                    }
-                    if (!added) {
-                        messageLog.add(f2MessageArray[i]); //if not inserted already, put at end
-                    }
-                    added = false;
-                }
-            }
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return messageLog;
-    }
     
     public static ArrayList<Message> findAllMessages(User user1, User user2) { // returns all messages between user1 and user2 in order
         ArrayList<Message> messageLog = new ArrayList<Message>();

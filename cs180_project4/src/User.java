@@ -4,9 +4,7 @@ import java.io.Serializable;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-enum userType {
-    CUSTOMER, SELLER
-}
+
 
 public class User implements Serializable {
     userType type; //false = customer. true = seller
@@ -51,7 +49,6 @@ public class User implements Serializable {
         this.blockedUsers = new ArrayList<>();
         this.invisibleUsers = new ArrayList<>();
     }
-
     public userType isType() {
         return type;
     }
@@ -70,6 +67,13 @@ public class User implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public List<User> getInvisibleUsers() {
+        return invisibleUsers;
+    }
+    public List<User> getBlockedUsers() {
+        return blockedUsers;
     }
 
     @Override

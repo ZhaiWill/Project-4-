@@ -29,11 +29,9 @@ public class Main {
             String sellOrBuy = s.nextLine();
             if (sellOrBuy.toLowerCase().equalsIgnoreCase("buyer")) {
                 User newUser = User.createUser(userType.CUSTOMER, newUsername, newPassword, email);
-                s.close();
                 return newUser;
             } else if (sellOrBuy.toLowerCase().equalsIgnoreCase("seller")) {
                 User newUser = User.createUser(userType.SELLER, newUsername, newPassword, email);
-                s.close();
                 return newUser;
             } else {
                 System.out.println("Sorry, not a valid option!");
@@ -89,7 +87,7 @@ public class Main {
         boolean repeat = true;
         System.out.println("1. Read all messages\n2. Send message\n3. Manage messages\n" +
                 "4. Browse stores\n5. Block User\n6. Become Invisible\n7. Manage account\n8. Exit");
-        while (repeat) {
+        while (repeat == true) {
             int input = s.nextInt();
             switch (input) {
                 // TODO: implement menus for initial menu 
@@ -104,37 +102,38 @@ public class Main {
                 default -> System.out.println("Error! Invalid input");
             }
         }
+        return;
     }
 
     public static void sendMessage(Scanner s, User sender) {
         while (true) {
             System.out.println("Enter message recipient");
+            s.nextLine();
             String username = s.nextLine();
             User recepient = db.getUser(username);
-            if (recepient.invisibleUsers.contains(sender)) {
+            List<User> invisibleUsers1 = recepient.getInvisibleUsers();
+            List<User> blockedUsers1 = sender.getBlockedUsers();
+            if (invisibleUsers1.contains(sender)) {
                 System.out.println("Error, no user with username " + username + " found. Please try again");
-            } else {
+            }
                 System.out.println("Enter message content");
                 String content = s.nextLine();
                 Message message = new Message(sender, recepient, content);
                 if (message == null || recepient == null) {
                     System.out.println("Error, invalid message, please try again");
                 } else {
-                    if (sender.blockedUsers.contains(recepient)) {
-                        System.out.println(sender.getUsername() + " is blocked by " + recepient.getUsername() + ". Message not sent.");
-                        s.close();
-                        break;
-                    } else {
+                    if (!blockedUsers1.contains(recepient)) {
                         db.saveMessage(message);
                         System.out.println("Message sent successfully");
-                        s.close();
+                        break;
+                    } else {
+                        System.out.println(sender.getUsername() + " is blocked by " + recepient.getUsername() + ". Message not sent.");
                         break;
                     }
-
                 }
             }
         }
-    }
+
 
     public static void readMessages(Scanner s, User receiver) {
         while (true) {
@@ -172,7 +171,7 @@ public class Main {
     }
     public static void manageAccount(Scanner s, User user) {
         boolean repeat = true;
-        System.out.print("What would you like to do?");
+        System.out.print("What would you like to do?\n");
         System.out.println("1. Edit Username\n2. Edit Password\n3. Delete Account\n4. Exit");
         while (repeat) {
             int input = s.nextInt();
@@ -191,14 +190,19 @@ public class Main {
                     String password = s.nextLine();
                     db.editPassword(user, password);
                 }
-                case 3 -> db.deleteUser(user);
+                case 3 -> {
+                    db.deleteUser(user);
+                    System.out.print("User deleted successfully");
+                    return;
+                }
                 default -> System.out.println("Error! Invalid input");
             }
         }
+        return;
     }
     public static void block(Scanner s, User thisUser) {
         boolean repeat = true;
-        System.out.println("What would you like to do?");
+        System.out.print("What would you like to do?\n");
         System.out.println("1. Block a user\n2. Unblock a user\n3. Exit");
         while (repeat) {
             int input = s.nextInt();
@@ -209,11 +213,12 @@ public class Main {
                 default -> System.out.println("Error! Invalid input");
             }
         }
+        return;
     }
     
     public static void invisible(Scanner s, User thisUser) {
         boolean repeat = true;
-        System.out.print("What would you like to do?");
+        System.out.print("What would you like to do?\n");
         System.out.println("1. Become invisible to a user\n2. Become uninvisible to a user\n3. Exit");
         while (repeat) {
             int input = s.nextInt();
@@ -224,36 +229,45 @@ public class Main {
                 default -> System.out.println("Error! Invalid input");
             }
         }
+        return;
     }
     public static void blockPrompt(Scanner s, User thisUser) {
         System.out.println("Enter the username of who you would like to block");
+        s.nextLine();
         String blockedUser = s.nextLine();
         User blockerUser1 = db.getUser(blockedUser);
         thisUser.blockUser(blockerUser1);
+        menuSystem(s, thisUser);
     }
     public static void unblockPrompt(Scanner s, User thisUser) {
         System.out.println("Enter the username of who you would like to unblock");
+        s.nextLine();
         String unblockedUser = s.nextLine();
         User unblockerUser1 = db.getUser(unblockedUser);
         thisUser.unblockUser(unblockerUser1);
+        menuSystem(s, thisUser);
     }
     public static void invisiblePrompt(Scanner s, User thisUser) {
         System.out.println("Enter the username of who you would like to become invisible to");
+        s.nextLine();
         String invisibleUser = s.nextLine();
         User invisibleUser1 = db.getUser(invisibleUser);
         thisUser.becomeInvisible(invisibleUser1);
+        menuSystem(s, thisUser);
     }
     public static void uninvisiblePrompt(Scanner s, User thisUser) {
         System.out.println("Enter the username of who you would like to become uninvisible to");
+        s.nextLine();
         String uninvisibleUser = s.nextLine();
         User uninvisibleUser1 = db.getUser(uninvisibleUser);
         thisUser.becomeUninvisible(uninvisibleUser1);
+        menuSystem(s, thisUser);
     }
     public static void menuSystem(Scanner s, User user){
-        if (user.type.equals(userType.CUSTOMER)){
-            initMenuSeller(s, user);
-        } else {
+        if (user.isType() == userType.CUSTOMER){
             initMenuBuyer(s, user);
+        } else {
+            initMenuSeller(s, user);
         }
     }
     public static void main(String[] args) {
@@ -270,7 +284,7 @@ public class Main {
             }
         } else {
             thisUser = createAccount(s);
+            menuSystem(s, thisUser);
         }
-        sendMessage(s,thisUser);  
     }
 }
