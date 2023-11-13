@@ -150,7 +150,6 @@ public class db {
     }
 
     public static Message createMessage(Message message) {
-        if (!Message.isValidMessage(message)) return null;
         String senderUsername = message.getSender().getUsername();
         String receiverUsername = message.getReceiver().getUsername();
         String uuid = message.getUuid().toString();
