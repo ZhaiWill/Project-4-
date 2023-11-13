@@ -1,5 +1,7 @@
 import java.util.Scanner;
 import java.util.UUID;
+import java.io.File;
+import java.util.ArrayList;
 
 public class Main {
     public static int openingPrompt(Scanner s) {
@@ -87,7 +89,7 @@ public class Main {
             int input = s.nextInt();
             switch (input) {
                 // TODO: implement menus for initial menu 
-                case 1 -> System.out.println(input);
+                case 1 -> readMessages(s, user);
                 case 2 -> sendMessage(s,user);
                 case 3 -> System.out.println(input);
                 case 4 -> System.out.println(input);
@@ -95,6 +97,41 @@ public class Main {
                 case 6 -> System.out.println(input);
                 case 7 -> repeat = false;
                 default -> System.out.println("Error! Invalid input");
+            }
+        }
+    }
+
+    public static void readMessages(Scanner s, User receiver) {
+        while (true) {
+            ArrayList<User> correspondents = db.getAllCorrespondents(receiver);
+            System.out.println("Which User's messages would you like to read?");
+            for (User u : correspondents) {
+                System.out.println(u.getUsername());
+            }
+            String input = s.nextLine();
+            boolean found = false;
+            for (User u : correspondents) {
+                if (u.getUsername().equals(input)) {
+                    found = true;
+                    ArrayList<Message> messages = db.findAllMessages(receiver, u);
+                    for (Message m : messages) {
+                        System.out.println(m.toString()); //maybe make it more readable
+                    }
+                }
+            }
+            if (!found) {
+                System.out.println("Sorry, you don't have correspondence with that User yet.");
+            }
+            while (true) {
+                System.out.println("Continue reading messages? (Y or N)");
+                input = s.nextLine();
+                if (input.toLowerCase().equals("y")) {
+                    continue;
+                } else if (input.toLowerCase().equals("n")) {
+                    break;
+                } else {
+                    System.out.println("type Y or N.");
+                }
             }
         }
     }
@@ -118,7 +155,7 @@ public class Main {
         } 
     }
     public static void main(String[] args) {
-        //ALL TESTS ARE NOW IN TEST.JAVA SO WE CAN START IMPLEMENTING MAIN METHOD
+        // ALL TESTS ARE NOW IN TEST.JAVA SO WE CAN START IMPLEMENTING MAIN METHOD
         Scanner s = new Scanner(System.in);
         int choice = openingPrompt(s);
         User thisUser;
@@ -128,5 +165,7 @@ public class Main {
             thisUser = createAccount(s);
         }
         sendMessage(s,thisUser);
+       
+        
     }
 }
