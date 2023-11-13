@@ -2,8 +2,7 @@ import java.util.Scanner;
 import java.util.UUID;
 
 public class Main {
-    public static int openingPrompt() {
-        Scanner s = new Scanner(System.in);
+    public static int openingPrompt(Scanner s) {
         System.out.println("Welcome!\n 1. Sign in to account\n 2. Create new Account");
         while (true) {
             int choice = s.nextInt();
@@ -14,8 +13,7 @@ public class Main {
             }
         }
     }
-    public static User createAccount() {
-        Scanner s = new Scanner(System.in);
+    public static User createAccount(Scanner s) {
         System.out.println("Enter your new username: ");
         String newUsername = s.nextLine();
         System.out.println( "Enter your password:");
@@ -39,8 +37,7 @@ public class Main {
         }
     }
 
-    public static User loginToAccount() { // to log into an existing account
-        Scanner s = new Scanner(System.in);
+    public static User loginToAccount(Scanner s) { // to log into an existing account
         System.out.println("Please enter your username:");
             while (true) {
             String username = s.nextLine();
@@ -62,8 +59,7 @@ public class Main {
         }
     }
 
-    public static void initMenuSeller(User user) {
-        Scanner s = new Scanner(System.in);
+    public static void initMenuSeller(Scanner s, User user) {
         boolean repeat = true;
         System.out.println("1. Read all messages\n2. Send message\n3. Manage account\n" +
                             "4. Manage stores\n5. View statistics\n6. Manage messages\n7. Exit");
@@ -72,7 +68,7 @@ public class Main {
             switch (input) {
                 // TODO: implement menus for initial menu 
                 case 1 -> System.out.println(input);
-                case 2 -> sendMessage(user);
+                case 2 -> sendMessage(s,user);
                 case 3 -> System.out.println(input);
                 case 4 -> System.out.println(input);
                 case 5 -> System.out.println(input);
@@ -83,8 +79,7 @@ public class Main {
         }
     }
 
-    public static void initMenuBuyer(User user) {
-        Scanner s = new Scanner(System.in);
+    public static void initMenuBuyer(Scanner s, User user) {
         boolean repeat = true;
         System.out.println("1. Read all messages\n2. Send message\n3. Manage messages\n" +
                             "4. Browse stores\n5. View statistics\n6. Manage account\n7. Exit");
@@ -93,7 +88,7 @@ public class Main {
             switch (input) {
                 // TODO: implement menus for initial menu 
                 case 1 -> System.out.println(input);
-                case 2 -> sendMessage(user);
+                case 2 -> sendMessage(s,user);
                 case 3 -> System.out.println(input);
                 case 4 -> System.out.println(input);
                 case 5 -> System.out.println(input);
@@ -104,8 +99,7 @@ public class Main {
         }
     }
 
-    public static void sendMessage(User sender){
-        Scanner s = new Scanner(System.in);
+    public static void sendMessage(Scanner s,User sender) {
         while (true) {    
             System.out.println("Enter message recipient");
             String username = s.nextLine();
@@ -125,13 +119,14 @@ public class Main {
     }
     public static void main(String[] args) {
         //ALL TESTS ARE NOW IN TEST.JAVA SO WE CAN START IMPLEMENTING MAIN METHOD
-        int choice = openingPrompt();
+        Scanner s = new Scanner(System.in);
+        int choice = openingPrompt(s);
         User thisUser;
         if (choice == 1) {
-            thisUser = loginToAccount();
+            thisUser = loginToAccount(s);
         } else {
-            thisUser = createAccount();
+            thisUser = createAccount(s);
         }
-        sendMessage(thisUser);
+        sendMessage(s,thisUser);
     }
 }
