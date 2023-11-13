@@ -15,11 +15,12 @@ public class Main {
             }
         }
     }
+
     public static User createAccount(Scanner s) {
         System.out.println("Enter your new username: ");
         s.nextLine();
         String newUsername = s.nextLine();
-        System.out.println( "Enter your password:");
+        System.out.println("Enter your password:");
         String newPassword = s.nextLine();
         System.out.println("Enter your email:");
         String email = s.nextLine();
@@ -43,7 +44,7 @@ public class Main {
     public static User loginToAccount(Scanner s) { // to log into an existing account
         System.out.println("Please enter your username:");
         s.nextLine();
-            while (true) {
+        while (true) {
             String username = s.nextLine();
             User user = db.getUser(username);
             if (user != null) {
@@ -66,14 +67,14 @@ public class Main {
     public static void initMenuSeller(Scanner s, User user) {
         boolean repeat = true;
         System.out.println("1. Read all messages\n2. Send message\n3. Manage account\n" +
-                            "4. Manage stores\n5. Block User\n6. Become Invisible\n7. Manage messages\n8. Exit");
+                "4. Manage stores\n5. Block User\n6. Become Invisible\n7. Manage messages\n8. Exit");
         while (repeat) {
             int input = s.nextInt();
             switch (input) {
                 // TODO: implement menus for initial menu 
                 case 1 -> readMessages(s, user);
-                case 2 -> sendMessage(s,user);
-                case 3 -> System.out.println(input);
+                case 2 -> sendMessage(s, user);
+                case 3 -> manageAccount(s, user);
                 case 4 -> System.out.println(input);
                 case 5 -> block(s, user);
                 case 6 -> invisible(s, user);
@@ -87,25 +88,25 @@ public class Main {
     public static void initMenuBuyer(Scanner s, User user) {
         boolean repeat = true;
         System.out.println("1. Read all messages\n2. Send message\n3. Manage messages\n" +
-                            "4. Browse stores\n5. Block User\n6. Become Invisible\n7. Manage account\n8. Exit");
+                "4. Browse stores\n5. Block User\n6. Become Invisible\n7. Manage account\n8. Exit");
         while (repeat) {
             int input = s.nextInt();
             switch (input) {
                 // TODO: implement menus for initial menu 
                 case 1 -> readMessages(s, user);
-                case 2 -> sendMessage(s,user);
+                case 2 -> sendMessage(s, user);
                 case 3 -> System.out.println(input);
                 case 4 -> System.out.println(input);
                 case 5 -> block(s, user);
                 case 6 -> invisible(s, user);
-                case 7 -> System.out.println(input);
+                case 7 -> manageAccount(s, user);
                 case 8 -> repeat = false;
                 default -> System.out.println("Error! Invalid input");
             }
         }
     }
 
-    public static void sendMessage(Scanner s,User sender) {
+    public static void sendMessage(Scanner s, User sender) {
         while (true) {
             System.out.println("Enter message recipient");
             String username = s.nextLine();
@@ -132,9 +133,9 @@ public class Main {
 
                 }
             }
-        } 
+        }
     }
-    
+
     public static void readMessages(Scanner s, User receiver) {
         while (true) {
             ArrayList<User> correspondents = db.getAllCorrespondents(receiver);
@@ -169,7 +170,32 @@ public class Main {
             }
         }
     }
-    
+    public static void manageAccount(Scanner s, User user) {
+        boolean repeat = true;
+        System.out.print("What would you like to do?");
+        System.out.println("1. Edit Username\n2. Edit Password\n3. Delete Account\n4. Exit");
+        while (repeat) {
+            int input = s.nextInt();
+            switch (input) {
+                case 1 -> {
+                    System.out.println("Enter new username");
+                    String username = s.nextLine();
+                    if(db.editUsername(user, username) == true) {
+                        System.out.print("Successfully changed username");
+                    } else {
+                        System.out.print("Username not available. Try again.");
+                    }
+                }
+                case 2 -> {
+                    System.out.println("Enter new password");
+                    String password = s.nextLine();
+                    db.editPassword(user, password);
+                }
+                case 3 -> db.deleteUser(user);
+                default -> System.out.println("Error! Invalid input");
+            }
+        }
+    }
     public static void block(Scanner s, User thisUser) {
         boolean repeat = true;
         System.out.println("What would you like to do?");
