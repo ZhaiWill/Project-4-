@@ -69,7 +69,7 @@ public class Main {
             int input = s.nextInt();
             switch (input) {
                 // TODO: implement menus for initial menu 
-                case 1 -> System.out.println(input);
+                case 1 -> readMessages(s, user);
                 case 2 -> sendMessage(s,user);
                 case 3 -> System.out.println(input);
                 case 4 -> System.out.println(input);
