@@ -1,4 +1,7 @@
+import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 enum userType {
@@ -28,6 +31,16 @@ public class User implements Serializable {
 
         return db.saveMessage(new Message(this, receiver, message));
 
+    }
+
+    public Message sendMessage(User receiver, File file) {
+        try {
+            String fileContents = new String(Files.readAllBytes(file.toPath()));
+            return db.saveMessage(new Message(this, receiver, fileContents));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null; 
+        }
     }
 
     private User(userType type, String username, String password, String email) {

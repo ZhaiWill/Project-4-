@@ -172,7 +172,7 @@ public class Main {
     
     public static void block(Scanner s, User thisUser) {
         boolean repeat = true;
-        System.out.print("What would you like to do?");
+        System.out.println("What would you like to do?");
         System.out.println("1. Block a user\n2. Unblock a user\n3. Exit");
         while (repeat) {
             int input = s.nextInt();
@@ -240,7 +240,7 @@ public class Main {
             if (thisUser.isType() == userType.SELLER) {
                initMenuSeller(s, thisUser);
             } else {
-                initMenuBuyer(s, thisUser);
+                initMenuBuyer(s, thisUser); 
             }
         } else {
             thisUser = createAccount(s);
