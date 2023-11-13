@@ -148,13 +148,17 @@ public class UI {
     }
 
     public String getMessageContents() {
+        if(queryYesNo("Would you like to send the message from a file?")){
+            String res =newMessageContentsFILE();
+            
+            return res;
+        }
         return queryValue("What would you like the contents of the message to be?", true);
     }
 
     public String newMessageContentsFILE() {
         String res = null;
         do {
-            if (queryYesNo("Would you like to import a file as your message?")) {
                 try {
                     File f = new File(queryValue("path to file", false));
                     String fileContents = new String((Files.readAllBytes(f.toPath())));
@@ -163,9 +167,7 @@ public class UI {
                     System.out.println("Sorry, we can not ready any file with that path");
                     continue;
                 }
-            } else {
-                res = queryValue("What is the message you would like to send?", true);
-            }
+
         } while (res == null);
         return res;
     }
@@ -349,12 +351,12 @@ public class UI {
         else System.out.println(query);
         //ensure that input is alphanumeric
 
-        return getAlphaNumericValue();
+        return getStringValue();
     }
 
     public boolean queryYesNo(String query) {
         System.out.println(query + " (Y/N):");
-        return getAlphaNumericValue().toLowerCase().startsWith("y");
+        return getStringValue().toLowerCase().startsWith("y");
     }
 
     public void pressEnterToContinue() {
@@ -379,16 +381,25 @@ public class UI {
         }
         return res;
     }
-    public String getAlphaNumericValue(){
+    public String getStringValue() {
         String res = null;
         while (res == null) {
             res = scan.nextLine();
-            if (!res.matches("[a-zA-Z0-9]+")) {
-                System.out.println("Please enter a valid alphanumeric string");
+            if (!isValidString(res)) {
+                System.out.println("Please enter a valid string with only letters, periods, and /");
                 res = null;
-                continue;
             }
         }
         return res;
+    }
+
+    private boolean isValidString(String input) {
+        // Check if the input contains only letters, periods, and /
+        for (char c : input.toCharArray()) {
+            if (!Character.isLetter(c) && !Character.isDigit(c) && c != '.' && c != '/') {
+                return false;
+            }
+        }
+        return true;
     }
 }
