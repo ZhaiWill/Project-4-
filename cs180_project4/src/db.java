@@ -1,5 +1,5 @@
 import java.io.*;
-import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class db {
@@ -49,8 +49,8 @@ public class db {
         String usersDirectoryPath = root + "/users";
         String messagesDirectoryPath = root + "/messages";
         String storesDirectoryPath = root + "/stores";
-        
-        if (createDirectory(usersDirectoryPath) && createDirectory(messagesDirectoryPath)  && createDirectory(storesDirectoryPath)) {
+
+        if (createDirectory(usersDirectoryPath) && createDirectory(messagesDirectoryPath) && createDirectory(storesDirectoryPath)) {
             output.debugPrint("User and messages directories created.");
             return true;
         } else {
@@ -66,6 +66,7 @@ public class db {
         }
         return true;
     }
+
     //CAUTION. WILL OVERWRITE
     public static User saveUser(User user) {
         //if (user == null) return null;
@@ -107,7 +108,32 @@ public class db {
         output.debugPrint("User deleted");
         return true;
     }
-    
+
+    public static ArrayList<User> getAllUsers() {
+        ArrayList<User> users = new ArrayList<>();
+        File usersDirectory = new File(root + "/users");
+
+        if (usersDirectory.exists() && usersDirectory.isDirectory()) {
+            File[] userFiles = usersDirectory.listFiles();
+
+            if (userFiles != null) {
+                for (File userFile : userFiles) {
+                    try (FileInputStream fileInputStream = new FileInputStream(userFile);
+                         ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
+
+                        User user = (User) objectInputStream.readObject();
+                        users.add(user);
+                    } catch (IOException | ClassNotFoundException e) {
+                        output.debugPrint("Failed to read user from " + userFile.getPath());
+                        output.debugPrint(Arrays.toString(e.getStackTrace()));
+                    }
+                }
+            }
+        }
+
+        return users;
+    }
+
     public static boolean editUsername(User user, String newUsername) {
         if (db.getUser(user.getUsername()) != null) {
             output.debugPrint("User with username {" + user.getUsername() + "} already exists.");
@@ -124,7 +150,7 @@ public class db {
         return true;
     }
 
-    public static Message saveMessage(Message message) {
+    public static Message createMessage(Message message) {
         if (!Message.isValidMessage(message)) return null;
         String senderUsername = message.getSender().getUsername();
         String receiverUsername = message.getReceiver().getUsername();
@@ -214,6 +240,7 @@ public class db {
             saveEditedMessage(message, newContent, message.receiver);
         }
     }
+
     private static void saveEditedMessage(Message message, String newContent, User user) {
         String filePath = getMessageFilePath(user, message);
 
@@ -269,12 +296,16 @@ public class db {
 
         return filePath;
     }
+
     private static boolean isMessageDeleted(User user, Message message) {
         String filePath = getMessageFilePath(user, message);
 
         File messageFile = new File(filePath);
         return !messageFile.exists();
     }
+
+
+    //handling stores and all that stuff
     public static Store saveStore(Store store) {
         if (db.readStoreFromFile(store.getName()) != null) {
             output.debugPrint("Stores cannot have the same name");
@@ -284,8 +315,8 @@ public class db {
         String filePath = dirPath + store.getName() + ".storeInfo";
         createDirectory(dirPath);
 
-        try (FileOutputStream fileOutputStream = new FileOutputStream(filePath); 
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream)) {
+        try (FileOutputStream fileOutputStream = new FileOutputStream(filePath);
+             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream)) {
 
             objectOutputStream.writeObject(store);
             output.debugPrint("Store serialized and saved to " + store.getName() + ".storeInfo");
@@ -300,7 +331,7 @@ public class db {
     public static Item saveItem(Store store, Item item) {
         String itemName = item.getName();
         String storeName = store.getName();
-        
+
         String storeDirPath = root + "/stores/" + storeName;
 
         createDirectory(storeDirPath);
@@ -308,7 +339,7 @@ public class db {
         String itemFilePath = storeDirPath + "/" + itemName + ".item";
 
         try (FileOutputStream senderOutputStream = new FileOutputStream(itemFilePath);
-             ObjectOutputStream senderObjectOutputStream = new ObjectOutputStream(senderOutputStream)){
+             ObjectOutputStream senderObjectOutputStream = new ObjectOutputStream(senderOutputStream)) {
 
             senderObjectOutputStream.writeObject(item);
             output.debugPrint("Wrote object to " + itemFilePath);
@@ -320,29 +351,18 @@ public class db {
         return item;
     }
 
-    public static void deleteDir(File file) {
-        File[] contents = file.listFiles();
-        if (contents != null) {
-            for (File f : contents) {
-                if (! Files.isSymbolicLink(f.toPath())) {
-                deleteDir(f);
-                }
-            }
-        }
-        file.delete();
-    }
 
     public static boolean removeStore(String storeName) {
         String storeDirPath = root + "/stores/" + storeName;
         File f = new File(storeDirPath);
-        deleteDir(f);
+        deleteDirectory(f);
         return true;
     }
-    
+
     public static boolean removeItem(Store store, Item item) {
         String itemName = item.getName();
         String storeName = store.getName();
-        
+
         String storeDirPath = root + "/stores/" + storeName;
         String itemFilePath = storeDirPath + "/" + itemName + ".item";
 
@@ -352,15 +372,15 @@ public class db {
     }
 
     public static Item readItemFromFile(Store store, String itemName) {
-        
+
         String storeName = store.getName();
-        
+
         String storeDirPath = root + "/stores/" + storeName;
         String itemFilePath = storeDirPath + "/" + itemName + ".item";
-        
+
         try (FileInputStream fileInputStream = new FileInputStream(itemFilePath);
              ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
-            
+
             Item newItem = (Item) objectInputStream.readObject();
             output.debugPrint("Message deserialized from " + itemFilePath);
             return newItem;
@@ -371,14 +391,14 @@ public class db {
         }
     }
 
-    public static Store readStoreFromFile(String storeName){
-        
+    public static Store readStoreFromFile(String storeName) {
+
         String storeDirPath = root + "/stores/" + storeName;
         String itemFilePath = storeDirPath + "/" + storeName + ".storeInfo";
-        
+
         try (FileInputStream fileInputStream = new FileInputStream(itemFilePath);
              ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
-            
+
             Store newStore = (Store) objectInputStream.readObject();
             output.debugPrint("Message deserialized from " + itemFilePath);
             return newStore;
@@ -389,7 +409,7 @@ public class db {
         }
     }
 
-   public static boolean buyItem(Store store, String itemName, int quantity) {
+    public static boolean buyItem(Store store, String itemName, int quantity) {
         Item item = readItemFromFile(store, itemName);
         if (item.getQuantity() - quantity < 0) {
             output.debugPrint("Cannot have items with quantity less than 0");
@@ -400,7 +420,7 @@ public class db {
         output.debugPrint("Bought item successfully");
         return true;
     }
-    
+
     public static boolean restockItem(Store store, String itemName, int quantity) {
         Item item = readItemFromFile(store, itemName);
         if (quantity <= 0) {

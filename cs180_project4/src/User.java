@@ -1,7 +1,15 @@
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 enum userType {
-    CUSTOMER, SELLER
+    CUSTOMER, SELLER,
+}
+
+
+enum userBlockStatus {
+    INVISIBLE, BLOCKED, ALLOWED
 }
 
 public class User implements Serializable {
@@ -9,6 +17,7 @@ public class User implements Serializable {
     String username;
     String password;
     String email;
+    Map<String, userBlockStatus> userBlockStatusMap;
 
     public static User createUser(userType type, String username, String password, String email) {
         if (db.getUser(username) != null) {
@@ -22,9 +31,16 @@ public class User implements Serializable {
     }
 
 
+    /**
+     * If return type is null the message can not be sent due to the user being blocked
+     *
+     * @param receiver
+     * @param message
+     * @return
+     */
     public Message sendmessage(User receiver, String message) {
-
-        return db.saveMessage(new Message(this, receiver, message));
+        if (receiver.getUserBlockedStatus(receiver) != userBlockStatus.ALLOWED) return null;
+        return db.createMessage(new Message(this, receiver, message));
 
     }
 
@@ -33,6 +49,7 @@ public class User implements Serializable {
         this.username = username;
         this.password = password;
         this.email = email;
+        this.userBlockStatusMap = new HashMap<String, userBlockStatus>();
     }
 
     public userType isType() {
@@ -55,9 +72,35 @@ public class User implements Serializable {
         this.password = password;
     }
 
-    @Override
+    /**
+     * Returns a user type object stating whether the user that userBlockedStatus is being called on has become invisble to or has blocked the user passed as input
+     *
+     * @param user
+     * @return
+     */
+    public userBlockStatus getUserBlockedStatus(User user) {
+        return this.userBlockStatusMap.getOrDefault(user.username, userBlockStatus.ALLOWED);
+    }
+
     public String toString() {
         return "User{" + "type=" + type + ", username='" + username + '\'' + ", password='" + password + '\'' + ", email='" + email + '}';
+    }
+
+    public void setUserBlockStatus(String username, userBlockStatus blockStatus) {
+        this.userBlockStatusMap.put(username, blockStatus);
+    }
+
+    public ArrayList<User> getAllAccessibleUsers() {
+        //return all users that have getUserBlockedStatus return type of ALLOWED
+        ArrayList<User> accessibleUsers = new ArrayList<>();
+
+        for (User user : db.getAllUsers()) {
+            if (this.getUserBlockedStatus(user) == userBlockStatus.ALLOWED) {
+                accessibleUsers.add(user);
+            }
+        }
+
+        return accessibleUsers;
     }
 
 

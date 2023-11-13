@@ -1,5 +1,4 @@
 import java.util.Scanner;
-import java.util.UUID;
 
 public class Main {
     public static int openingPrompt(Scanner s) {
@@ -110,7 +109,7 @@ public class Main {
             if (message == null || recepient == null) {
                 System.out.println("Error, invalid message, please try again");
             } else {
-            db.saveMessage(message);
+            db.createMessage(message);
             System.out.println("Message sent successfully");
             s.close();
             break;
