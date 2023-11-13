@@ -266,8 +266,8 @@ public class db {
             File[] f2Array = f2.listFiles();
             Message[] f2MessageArray = new Message[f2Array.length];
             for (int i = 0; i < f1Array.length; i++) {
-                Message m1 = readMessageFromFile(f1Array[i].getName());
-                Message m2 = readMessageFromFile(f2Array[i].getName());
+                Message m1 = readMessageFromFile(f1Array[i].getPath());
+                Message m2 = readMessageFromFile(f2Array[i].getPath());
                 f1MessageArray[i] = m1;
                 f2MessageArray[i] = m2;
             }
