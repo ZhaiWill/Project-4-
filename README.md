@@ -8,9 +8,9 @@ Select the .java file called "Main." Run the main method in order to start the p
 
 2. List of who submitted each part on Vocareum/Brightspace.
 
-Submitted report - Elijah
+Submitted report on Brightspace - Elijah
 
-Submitted project github - Farhan
+Submitted Vocareum workspace. - Farhan
 
 3. Descriptions of each class.
 
