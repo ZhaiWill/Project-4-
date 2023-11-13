@@ -1,7 +1,5 @@
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 enum userType {
     CUSTOMER, SELLER,
@@ -95,12 +93,29 @@ public class User implements Serializable {
         ArrayList<User> accessibleUsers = new ArrayList<>();
 
         for (User user : db.getAllUsers()) {
-            if (this.getUserBlockedStatus(user) == userBlockStatus.ALLOWED) {
+            if (this.getUserBlockedStatus(user) != userBlockStatus.INVISIBLE && (this.type != user.type)) {
                 accessibleUsers.add(user);
             }
         }
 
         return accessibleUsers;
+    }
+
+    public ArrayList<String> getAllAccessibleConversations() {
+        ArrayList<User> allConversations = db.getAllConversations(this);
+        ArrayList<String> accessibleConversations = new ArrayList<>();
+
+        for (User user : allConversations) {
+            if (this.getUserBlockedStatus(user) != userBlockStatus.INVISIBLE && (this.type != user.type)) {
+                accessibleConversations.add(user.username);
+            }
+        }
+        //remove all duplicates accessibleConversations and sort alphabetically
+
+        ArrayList<String> uniqueAccessibleConversations = new ArrayList<>(new HashSet<>(accessibleConversations));
+        Collections.sort(uniqueAccessibleConversations);
+
+        return uniqueAccessibleConversations;
     }
 
 

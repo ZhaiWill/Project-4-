@@ -1,6 +1,5 @@
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 
 public class db {
     private static String root = "storage";
@@ -302,6 +301,86 @@ public class db {
 
         File messageFile = new File(filePath);
         return !messageFile.exists();
+    }
+
+    public static ArrayList<Message> getConversation(User viewer, User otherParticipant) {
+        ArrayList<Message> conversation = new ArrayList<>();
+
+        // Retrieve messages sent from the viewer to the other participant
+        String sentMessagesPath = root + "/messages/" + viewer.getUsername() + "/sent/" + otherParticipant.getUsername();
+        getConversationHelper(conversation, sentMessagesPath);
+
+        // Retrieve messages received by the viewer from the other participant
+        String receivedMessagesPath = root + "/messages/" + viewer.getUsername() + "/received/" + otherParticipant.getUsername();
+        getConversationHelper(conversation, receivedMessagesPath);
+
+        // Sort messages by timestamp
+        conversation.sort(Comparator.comparing(Message::getTimestamp));
+
+        return conversation;
+    }
+
+    private static void getConversationHelper(ArrayList<Message> conversation, String folderPath) {
+        File folder = new File(folderPath);
+        if (folder.exists() && folder.isDirectory()) {
+            File[] messageFiles = folder.listFiles();
+
+            if (messageFiles != null) {
+                for (File messageFile : messageFiles) {
+                    Message message = readMessageFromFile(messageFile.getPath());
+                    if (message != null) {
+                        conversation.add(message);
+                    }
+                }
+            }
+        }
+    }
+
+
+    public static ArrayList<User> getAllConversations(User user) {
+        ArrayList<User> conversations = new ArrayList<>();
+        String userMessagesPath = root + "/messages/" + user.getUsername();
+
+        File sentDirectory = new File(userMessagesPath + "/sent");
+        File receivedDirectory = new File(userMessagesPath + "/received");
+
+        // Get unique User objects from sent messages
+        if (sentDirectory.exists() && sentDirectory.isDirectory()) {
+            File[] sentDirs = sentDirectory.listFiles();
+
+            if (sentDirs != null) {
+                for (File receiverDir : sentDirs) {
+                    String username = receiverDir.getName();
+                    User conversationUser = getUser(username);
+                    if (conversationUser != null) {
+                        conversations.add(conversationUser);
+                    }
+                }
+            }
+        }
+
+        // Get unique User objects from received messages
+        if (receivedDirectory.exists() && receivedDirectory.isDirectory()) {
+            File[] receivedDirs = receivedDirectory.listFiles();
+
+            if (receivedDirs != null) {
+                for (File senderDir : receivedDirs) {
+                    String username = senderDir.getName();
+                    User conversationUser = getUser(username);
+                    if (conversationUser != null) {
+                        conversations.add(conversationUser);
+                    }
+                }
+            }
+        }
+
+        // Remove duplicates and alphabetically sort
+        HashSet<User> uniqueUsers = new HashSet<>(conversations);
+        conversations.clear();
+        conversations.addAll(uniqueUsers);
+        Collections.sort(conversations, Comparator.comparing(User::getUsername));
+
+        return conversations;
     }
 
 

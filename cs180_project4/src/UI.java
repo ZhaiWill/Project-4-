@@ -2,6 +2,8 @@
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class UI {
@@ -15,16 +17,15 @@ public class UI {
 
     public void run() {
         this.loggedInUser = generateWelcomeScreen();
-        generateMainMenu();
+        while (true) {
+            generateMainMenu();
+        }
     }
 
     public void generateMainMenu() {
-        switch (generateMenu(new String[]{"Send a Message", ""})) {
-            case 0:
-                sendMessageMenu();
-                break;
-            case 1:
-            case 2:
+        switch (generateMenu(new String[]{"Send a Message", "View Conversations"})) {
+            case 0 -> sendMessageMenu();
+            case 1 -> viewConversationsMenu();
         }
     }
 
@@ -73,6 +74,35 @@ public class UI {
         }
         while (res == null);
         return res;
+    }
+
+
+    public void viewConversationsMenu() {
+        List<String> userConvoList = loggedInUser.getAllAccessibleConversations();
+        if (userConvoList.size() == 0) {
+            System.out.println("You currently have no conversations");
+            return;
+        }
+        System.out.println("What conversation would you like to see?");
+        int userOption = generateMenu(userConvoList.toArray(new String[0]));
+        viewConversationWith(userConvoList.get(userOption));
+    }
+
+    public void viewConversationWith(String username) {
+        ArrayList<Message> messages = db.getConversation(this.loggedInUser, db.getUser(username));
+
+        for (int i = 0; i < messages.size(); i++) {
+            Message m = messages.get(i);
+            String res = "";
+            res += m.getTimestamp();
+            res += ": ";
+            res += m.sender.username;
+            res += ": ";
+            res += m.contents;
+            System.out.println(res);
+        }
+        System.out.println("Press Enter to continue");
+        scan.nextLine();
     }
 
 

@@ -12,10 +12,11 @@ public class Main {
             }
         }
     }
+
     public static User createAccount(Scanner s) {
         System.out.println("Enter your new username: ");
         String newUsername = s.nextLine();
-        System.out.println( "Enter your password:");
+        System.out.println("Enter your password:");
         String newPassword = s.nextLine();
         System.out.println("Enter your email:");
         String email = s.nextLine();
@@ -38,7 +39,7 @@ public class Main {
 
     public static User loginToAccount(Scanner s) { // to log into an existing account
         System.out.println("Please enter your username:");
-            while (true) {
+        while (true) {
             String username = s.nextLine();
             User user = db.getUser(username);
             if (user != null) {
@@ -61,13 +62,13 @@ public class Main {
     public static void initMenuSeller(Scanner s, User user) {
         boolean repeat = true;
         System.out.println("1. Read all messages\n2. Send message\n3. Manage account\n" +
-                            "4. Manage stores\n5. View statistics\n6. Manage messages\n7. Exit");
+                "4. Manage stores\n5. View statistics\n6. Manage messages\n7. Exit");
         while (repeat) {
             int input = s.nextInt();
             switch (input) {
                 // TODO: implement menus for initial menu 
                 case 1 -> System.out.println(input);
-                case 2 -> sendMessage(s,user);
+                case 2 -> sendMessage(s, user);
                 case 3 -> System.out.println(input);
                 case 4 -> System.out.println(input);
                 case 5 -> System.out.println(input);
@@ -81,13 +82,13 @@ public class Main {
     public static void initMenuBuyer(Scanner s, User user) {
         boolean repeat = true;
         System.out.println("1. Read all messages\n2. Send message\n3. Manage messages\n" +
-                            "4. Browse stores\n5. View statistics\n6. Manage account\n7. Exit");
+                "4. Browse stores\n5. View statistics\n6. Manage account\n7. Exit");
         while (repeat) {
             int input = s.nextInt();
             switch (input) {
                 // TODO: implement menus for initial menu 
                 case 1 -> System.out.println(input);
-                case 2 -> sendMessage(s,user);
+                case 2 -> sendMessage(s, user);
                 case 3 -> System.out.println(input);
                 case 4 -> System.out.println(input);
                 case 5 -> System.out.println(input);
@@ -98,8 +99,8 @@ public class Main {
         }
     }
 
-    public static void sendMessage(Scanner s,User sender) {
-        while (true) {    
+    public static void sendMessage(Scanner s, User sender) {
+        while (true) {
             System.out.println("Enter message recipient");
             String username = s.nextLine();
             User recepient = db.getUser(username);
@@ -109,25 +110,23 @@ public class Main {
             if (message == null || recepient == null) {
                 System.out.println("Error, invalid message, please try again");
             } else {
-            db.createMessage(message);
-            System.out.println("Message sent successfully");
-            s.close();
-            break;
-            } 
-        } 
+                db.createMessage(message);
+                System.out.println("Message sent successfully");
+                s.close();
+                break;
+            }
+        }
     }
+
     public static void main(String[] args) {
-//        db.initializeDatabase();
+        db.initializeDatabase();
+        User bob = User.createUser(userType.CUSTOMER, "bob", "123", "1@gmai.com");
+        User joe = User.createUser(userType.SELLER, "joe", "123", "2@gmai.com");
+        assert bob != null;
+        assert joe != null;
+//        bob.sendmessage(joe, "hi");
+//        joe.sendmessage(bob, "hello");
+//        bob.sendmessage(joe, "how are you");
         new UI().run();
-        //ALL TESTS ARE NOW IN TEST.JAVA SO WE CAN START IMPLEMENTING MAIN METHOD
-//        Scanner s = new Scanner(System.in);
-//        int choice = openingPrompt(s);
-//        User thisUser;
-//        if (choice == 1) {
-//            thisUser = loginToAccount(s);
-//        } else {
-//            thisUser = createAccount(s);
-//        }
-//        sendMessage(s,thisUser);
     }
 }
