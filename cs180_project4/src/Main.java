@@ -1,8 +1,8 @@
 import java.util.Scanner;
 import java.util.UUID;
-import java.io.File;
 import java.util.ArrayList;
-
+import java.util.List;
+import java.io.File;
 public class Main {
     public static int openingPrompt(Scanner s) {
         System.out.println("Welcome!\n 1. Sign in to account\n 2. Create new Account");
@@ -101,61 +101,61 @@ public class Main {
         }
     }
 
-    public static void readMessages(Scanner s, User receiver) {
-        while (true) {
-            ArrayList<User> correspondents = db.getAllCorrespondents(receiver);
-            System.out.println("Which User's messages would you like to read?");
-            for (User u : correspondents) {
-                System.out.println(u.getUsername());
-            }
-            String input = s.nextLine();
-            boolean found = false;
-            for (User u : correspondents) {
-                if (u.getUsername().equals(input)) {
-                    found = true;
-                    ArrayList<Message> messages = db.findAllMessages(receiver, u);
-                    for (Message m : messages) {
-                        System.out.println(m.toString()); //maybe make it more readable
-                    }
-                }
-            }
-            if (!found) {
-                System.out.println("Sorry, you don't have correspondence with that User yet.");
-            }
-            while (true) {
-                System.out.println("Continue reading messages? (Y or N)");
-                input = s.nextLine();
-                if (input.toLowerCase().equals("y")) {
-                    continue;
-                } else if (input.toLowerCase().equals("n")) {
-                    break;
-                } else {
-                    System.out.println("type Y or N.");
-                }
-            }
-        }
-    }
-
     public static void sendMessage(Scanner s,User sender) {
-        while (true) {    
+        while (true) {
             System.out.println("Enter message recipient");
             String username = s.nextLine();
             User recepient = db.getUser(username);
-            System.out.println("Enter message content");
-            String content = s.nextLine();
-            Message message = new Message(sender, recepient, content);
-            if (message == null || recepient == null) {
-                System.out.println("Error, invalid message, please try again");
+            if (recepient.invisibleUsers.contains(sender)) {
+                System.out.println("Error, no user with username " + username + " found. Please try again");
             } else {
-            db.saveMessage(message);
-            System.out.println("Message sent successfully");
-            s.close();
-            break;
-            } 
+                System.out.println("Enter message content");
+                String content = s.nextLine();
+                Message message = new Message(sender, recepient, content);
+                if (message == null || recepient == null) {
+                    System.out.println("Error, invalid message, please try again");
+                } else {
+                    if (sender.blockedUsers.contains(recepient)) {
+                        System.out.println(sender.getUsername() + " is blocked by " + recepient.getUsername() + ". Message not sent.");
+                        s.close();
+                        break;
+                    } else {
+                        db.saveMessage(message);
+                        System.out.println("Message sent successfully");
+                        s.close();
+                        break;
+                    }
+
+                }
+            }
         } 
     }
+    public static void blockPrompt(Scanner s, User thisUser) {
+        System.out.println("Enter the username of who you would like to block");
+        String blockedUser = s.nextLine();
+        User blockerUser1 = db.getUser(blockedUser);
+        thisUser.blockUser(blockerUser1);
+    }
+    public static void unblockPrompt(Scanner s, User thisUser) {
+        System.out.println("Enter the username of who you would like to unblock");
+        String unblockedUser = s.nextLine();
+        User unblockerUser1 = db.getUser(unblockedUser);
+        thisUser.unblockUser(unblockerUser1);
+    }
+    public static void InvisiblePrompt(Scanner s, User thisUser) {
+        System.out.println("Enter the username of who you would like to become invisible to");
+        String invisibleUser = s.nextLine();
+        User invisibleUser1 = db.getUser(invisibleUser);
+        thisUser.becomeInvisible(invisibleUser1);
+    }
+    public static void unInvisiblePrompt(Scanner s, User thisUser) {
+        System.out.println("Enter the username of who you would like to become uninvisible to");
+        String uninvisibleUser = s.nextLine();
+        User uninvisibleUser1 = db.getUser(uninvisibleUser);
+        thisUser.becomeUninvisible(uninvisibleUser1);
+    }
     public static void main(String[] args) {
-        // ALL TESTS ARE NOW IN TEST.JAVA SO WE CAN START IMPLEMENTING MAIN METHOD
+        //ALL TESTS ARE NOW IN TEST.JAVA SO WE CAN START IMPLEMENTING MAIN METHOD
         Scanner s = new Scanner(System.in);
         int choice = openingPrompt(s);
         User thisUser;
@@ -165,7 +165,5 @@ public class Main {
             thisUser = createAccount(s);
         }
         sendMessage(s,thisUser);
-       
-        
     }
 }
