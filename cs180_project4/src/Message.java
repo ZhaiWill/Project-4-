@@ -5,32 +5,32 @@ import java.util.UUID;
 public class Message implements Serializable {
     User sender;
     User receiver;
-    String contents;
+    String message;
     Date timestamp;
     UUID uuid;
 
-    public Message(User sender, User receiver, String contents) {
+    public Message(User sender, User receiver, String message) {
         this.sender = sender;
         this.receiver = receiver;
-        this.contents = contents;
+        this.message = message;
         this.timestamp = new Date();
-        this.uuid = UUID.nameUUIDFromBytes((sender.getUsername() + receiver.getUsername() + contents + timestamp.toString()).getBytes());
+        this.uuid = UUID.nameUUIDFromBytes((sender.getUsername() + receiver.getUsername() + message + timestamp.toString()).getBytes());
     }
 
-    public Message(User sender, User receiver, String contents, Date timestamp, UUID uuid) {
+    public Message(User sender, User receiver, String message, Date timestamp, UUID uuid) {
         this.sender = sender;
         this.receiver = receiver;
-        this.contents = contents;
+        this.message = message;
         this.timestamp = timestamp;
         this.uuid = uuid;
     }
 
-    public Message(User sender, User receiver, String contents, Date timestamp) {
+    public Message(User sender, User receiver, String message, Date timestamp) {
         this.sender = sender;
         this.receiver = receiver;
-        this.contents = contents;
+        this.message = message;
         this.timestamp = timestamp;
-        this.uuid = UUID.nameUUIDFromBytes((sender.getUsername() + receiver.getUsername() + contents + timestamp.toString()).getBytes());
+        this.uuid = UUID.nameUUIDFromBytes((sender.getUsername() + receiver.getUsername() + message + timestamp.toString()).getBytes());
     }
 
     public User getSender() {
@@ -45,8 +45,8 @@ public class Message implements Serializable {
         this.timestamp = new Date();
     }
 
-    public String getContents() {
-        return contents;
+    public String getMessage() {
+        return message;
     }
 
     public Date getTimestamp() {
@@ -57,8 +57,8 @@ public class Message implements Serializable {
         return uuid;
     }
 
-    public void setContents(String contents) {
-        this.contents = contents;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public void setSender(User sender) {
@@ -70,13 +70,13 @@ public class Message implements Serializable {
         return "Message{" +
                 "sender=" + sender +
                 ", receiver=" + receiver +
-                ", message='" + contents + '\'' +
+                ", message='" + message + '\'' +
                 ", timestamp=" + timestamp +
                 ", uuid=" + uuid + '}';
     }
 
     public void setContent(String newContent) {
-        this.contents = newContent;
+        this.message = newContent;
     }
 
     public static boolean isValidMessage(Message message) {
