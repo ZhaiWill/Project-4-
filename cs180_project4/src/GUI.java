@@ -7,6 +7,7 @@ public class GUI extends Main {
     private JFrame frame;
     private JPanel cardPanel;
     private CardLayout cardLayout;
+    private User user;
 
     public GUI() {
         frame = new JFrame("Messaging App");
@@ -120,7 +121,8 @@ public class GUI extends Main {
         return createBuyerView;
     }
 
-    private JPanel createSignInCard() {
+    public JPanel createSignInCard() {
+
         JPanel signInCard = new JPanel();
         signInCard.setLayout(new GridLayout(4, 2));
 
@@ -148,23 +150,21 @@ public class GUI extends Main {
         signInCard.add(new JLabel("Password:"));
         JPasswordField signInPasswordField = new JPasswordField();
         signInCard.add(signInPasswordField);
-
         JButton signInAction = new JButton("Sign In");
         signInAction.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                    String username = signInUsernameField.getText();
-                    User user = db.getUser(username);
-                    if (user == null) {
-                        JOptionPane.showMessageDialog(null, "Error, no user with username " + username + " found. Please try again", null, JOptionPane.INFORMATION_MESSAGE);
+                String username = signInUsernameField.getText();
+                User user = db.getUser(username);
+                    if (user != null) {
+                        String password = signInPasswordField.getText();
+                        if (user.getPassword().equals(password)) {
+                            cardLayout.show(cardPanel, "SellerView");
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Error, invalid password", null, JOptionPane.INFORMATION_MESSAGE);
+                        }
                     } else {
-                            String password = signInPasswordField.getText();
-                            if (user.getPassword().equals(password)) {
-                               cardLayout.show(cardPanel, "SellerView");
-                            } else {
-                                JOptionPane.showMessageDialog(null, "Error, invalid password", null, JOptionPane.INFORMATION_MESSAGE);
-                            }
-
+                        JOptionPane.showMessageDialog(null, "Error, no user with username " + username + " found. Please try again", null, JOptionPane.INFORMATION_MESSAGE);
                     }
             }
         });
@@ -172,7 +172,7 @@ public class GUI extends Main {
             return signInCard;
 }
 
-    private JPanel createCreateAccountCard() {
+    public JPanel createCreateAccountCard() {
         JPanel createAccountCard = new JPanel();
         createAccountCard.setLayout(new GridLayout(6, 2));
 
@@ -217,14 +217,18 @@ public class GUI extends Main {
                 String newUsername = createAccountUsernameField.getText();
                 String newPassword = createAccountPasswordField.getText();
                 String email = createAccountEmailField.getText();
-                if (createAccountQuestionField.getText().equalsIgnoreCase("seller")) {
-                    User newUser = User.createUser(userType.SELLER, newUsername, newPassword, email);
-                    cardLayout.show(cardPanel, "SellerView");
-                } else if (createAccountQuestionField.getText().equalsIgnoreCase("buyer")) {
-                    User newUser = User.createUser(userType.CUSTOMER, newUsername, newPassword, email);
-                    cardLayout.show(cardPanel, "BuyerView");
+                if(db.getUser(newUsername) != null) {
+                    JOptionPane.showMessageDialog(null, "Username already exists", null, JOptionPane.INFORMATION_MESSAGE);
                 } else {
-                    JOptionPane.showMessageDialog(null, "Invalid input", null, JOptionPane.INFORMATION_MESSAGE);
+                    if (createAccountQuestionField.getText().equalsIgnoreCase("seller")) {
+                        User newUser = User.createUser(userType.SELLER, newUsername, newPassword, email);
+                        cardLayout.show(cardPanel, "SellerView");
+                    } else if (createAccountQuestionField.getText().equalsIgnoreCase("buyer")) {
+                        User newUser = User.createUser(userType.CUSTOMER, newUsername, newPassword, email);
+                        cardLayout.show(cardPanel, "BuyerView");
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Invalid input", null, JOptionPane.INFORMATION_MESSAGE);
+                    }
                 }
             }
         });
@@ -241,7 +245,7 @@ public class GUI extends Main {
         createReadAll.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "GetMessages");
+                cardLayout.show(cardPanel, "ReadMessages");
             }
         });
         createSellerView.add(createReadAll);
@@ -325,11 +329,13 @@ public class GUI extends Main {
         sendMessageButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "SignInCard");
+                String recipient = createMessageRecipient.getText();
+                String content = createMessageInfo.getText();
+                Main.sendMessage(recipient, user, content);
+
             }
         });
         createMessageCard.add(sendMessageButton);
-
         return createMessageCard;
     }
 

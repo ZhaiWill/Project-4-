@@ -75,7 +75,7 @@ public class Main {
             switch (input) {
                 // TODO: implement menus for initial menu
                 case 1 -> readMessages(s, user);
-                case 2 -> sendMessage(s, user);
+                case 2 -> System.out.println(input);
                 case 3 -> manageAccount(s, user);
                 case 4 -> System.out.println(input);
                 case 5 -> block(s, user);
@@ -96,7 +96,7 @@ public class Main {
             switch (input) {
                 // TODO: implement menus for initial menu
                 case 1 -> readMessages(s, user);
-                case 2 -> sendMessage(s, user);
+                case 2 -> System.out.println(input);
                 case 3 -> System.out.println(input);
                 case 4 -> System.out.println(input);
                 case 5 -> block(s, user);
@@ -109,19 +109,14 @@ public class Main {
         return;
     }
 
-    public static void sendMessage(Scanner s, User sender) {
+    public static void sendMessage(String username, User sender, String content) {
         while (true) {
-            System.out.println("Enter message recipient");
-            s.nextLine();
-            String username = s.nextLine();
             User recepient = db.getUser(username);
             List<User> invisibleUsers1 = recepient.getInvisibleUsers();
             List<User> blockedUsers1 = sender.getBlockedUsers();
             if (invisibleUsers1.contains(sender)) {
                 System.out.println("Error, no user with username " + username + " found. Please try again");
             }
-                System.out.println("Enter message content");
-                String content = s.nextLine();
                 Message message = new Message(sender, recepient, content);
                 if (message == null || recepient == null) {
                     System.out.println("Error, invalid message, please try again");
