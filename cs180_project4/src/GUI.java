@@ -1,17 +1,9 @@
-import java.awt.BorderLayout;
-import java.awt.CardLayout;
-import java.awt.Dimension;
-import java.awt.GridLayout;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-
+import java.util.ArrayList;
+import java.util.List;
 public class GUI extends Main {
     private JFrame frame;
     private JPanel cardPanel;
@@ -35,10 +27,10 @@ public class GUI extends Main {
         JPanel invisibleUser = newInvisibleUser();
         JPanel getAll = newGetAll();
         JPanel manageStores = newManageStores();
-        JPanel createInitMenu = createInitMenu();
         JPanel signInCard = createSignInCard();
         JPanel createAccountCard = createCreateAccountCard();
         JPanel buyerView = createNewBuyerView();
+        JPanel readAll = createNewRealAll();
 
         cardPanel.add(sellerView, "SellerView");
         cardPanel.add(sendMessage, "SendMessage");
@@ -47,16 +39,15 @@ public class GUI extends Main {
         cardPanel.add(editUsername, "EditUsername");
         cardPanel.add(deleteAccount, "DeleteAccount");
         cardPanel.add(blockUser, "BlockUser");
-        cardPanel.add(manageStores, "ManageStores");
         cardPanel.add(invisibleUser, "InvisibleUser");
         cardPanel.add(getAll, "GetMessages");
-        cardPanel.add(createInitMenu, "InitMenu");
         cardPanel.add(signInCard, "SignInCard");
         cardPanel.add(createAccountCard, "CreateAccountCard");
         cardPanel.add(buyerView, "BuyerView");
+        cardPanel.add(readAll, "ReadAll");
 
         frame.add(cardPanel);
-        cardLayout.show(cardPanel, "InitMenu");
+        cardLayout.show(cardPanel, "SignInCard");
         frame.setVisible(true);
 
     }
@@ -69,7 +60,7 @@ public class GUI extends Main {
         createReadAll.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "GetMessages");
+                cardLayout.show(cardPanel, "ReadAll");
             }
         });
         createBuyerView.add(createReadAll);
@@ -132,25 +123,19 @@ public class GUI extends Main {
         return createBuyerView;
     }
 
-    public JPanel createInitMenu() {
-        JPanel newInitMenu = new JPanel();
+    public JPanel createSignInCard() {
+
+        JPanel signInCard = new JPanel();
+        signInCard.setLayout(new GridLayout(4, 2));
 
         JButton signInButton = new JButton("Sign In");
-        JButton createAccountButton = new JButton("Create Account");
-
-        newInitMenu.add(createAccountButton);
-        newInitMenu.add(signInButton);
-
-        createAccountButton.setPreferredSize(new Dimension(350, 250));
-        signInButton.setPreferredSize(new Dimension(350, 250));
-
         signInButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 cardLayout.show(cardPanel, "SignInCard");
             }
         });
-
+        JButton createAccountButton = new JButton("Create Account");
         createAccountButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -158,31 +143,23 @@ public class GUI extends Main {
             }
         });
 
-        return newInitMenu;
-    }
-
-    public JPanel createSignInCard() {
-
-        JPanel signInCard = new JPanel();
-        signInCard.setLayout(new GridLayout(5, 2));
-        JTextField signInUsernameField = new JTextField( 10);
-        signInUsernameField.setText("Username: ");
+        signInCard.add(createAccountButton);
+        signInCard.add(signInButton);
+        signInCard.add(new JLabel("Username:"));
+        JTextField signInUsernameField = new JTextField();
         signInCard.add(signInUsernameField);
 
-        JTextField signInPasswordField = new JTextField(10);
-        signInPasswordField.setText("Password: ");
+        signInCard.add(new JLabel("Password:"));
+        JPasswordField signInPasswordField = new JPasswordField();
         signInCard.add(signInPasswordField);
         JButton signInAction = new JButton("Sign In");
-        JButton backButton = new JButton("Back");
-        signInAction.setPreferredSize(new Dimension(350, 250));
+
         signInAction.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String username = signInUsernameField.getText();
-                username = username.substring(username.indexOf(":") + 2, username.length());
                 user = db.getUser(username);
                 String password = signInPasswordField.getText();
-                password = password.substring(password.indexOf(":") + 2, password.length());
                     if (user != null) {
                         if (user.getPassword().equals(password)) {
                             cardLayout.show(cardPanel, "SellerView");
@@ -194,23 +171,21 @@ public class GUI extends Main {
                     }
             }
         });
-
-        backButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "InitMenu");
-            }
-        });
-
     signInCard.add(signInAction);
-    signInCard.add(backButton);
-
-    return signInCard;
+            return signInCard;
 }
 
     public JPanel createCreateAccountCard() {
         JPanel createAccountCard = new JPanel();
-        createAccountCard.setLayout(new GridLayout(6, 1));
+        createAccountCard.setLayout(new GridLayout(6, 2));
+
+        JButton signInButton = new JButton("Sign In");
+        signInButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "SignInCard");
+            }
+        });
 
         JButton createAccountButton = new JButton("Create Account");
         createAccountButton.addActionListener(new ActionListener() {
@@ -220,43 +195,35 @@ public class GUI extends Main {
             }
         });
 
-        JButton backButton = new JButton("Back");
-        backButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "InitMenu");
-            }
-        });
-
         createAccountCard.add(createAccountButton);
-        createAccountButton.setPreferredSize(new Dimension(350, 250));
-        JTextField createAccountUsernameField = new JTextField("Username: " , 30);
+        createAccountCard.add(signInButton);
+        createAccountCard.add(new JLabel("Username:"));
+        JTextField createAccountUsernameField = new JTextField();
         createAccountCard.add(createAccountUsernameField);
 
-        JTextField createAccountPasswordField = new JTextField("Password: ", 30);
+        createAccountCard.add(new JLabel("Password:"));
+        JPasswordField createAccountPasswordField = new JPasswordField();
         createAccountCard.add(createAccountPasswordField);
 
-        JTextField createAccountEmailField = new JTextField("Email: ", 30);
+        createAccountCard.add(new JLabel("Email:"));
+        JTextField createAccountEmailField = new JTextField();
         createAccountCard.add(createAccountEmailField);
 
-        JTextField createAccountQuestionField = new JTextField("Are you a Buyer or Seller? ", 30);
+        createAccountCard.add(new JLabel("Are you a Buyer or Seller?"));
+        JTextField createAccountQuestionField = new JTextField();
         createAccountCard.add(createAccountQuestionField);
 
-        createAccountButton.addActionListener(new ActionListener() {
+        JButton createAccountAction = new JButton("Create Account");
+        createAccountAction.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String newUsername = createAccountUsernameField.getText();
-                newUsername = newUsername.substring(newUsername.indexOf(":") + 2, newUsername.length());
                 String newPassword = createAccountPasswordField.getText();
-                newPassword = newPassword.substring(newPassword.indexOf(":") + 2, newPassword.length());
                 String email = createAccountEmailField.getText();
-                email = email.substring(email.indexOf(":") + 2, email.length());
-                String type = createAccountQuestionField.getText();
-                type = type.substring(type.indexOf("?") + 2, type.length());
                 if(db.getUser(newUsername) != null) {
                     JOptionPane.showMessageDialog(null, "Username already exists", null, JOptionPane.INFORMATION_MESSAGE);
                 } else {
-                    if (type.equalsIgnoreCase("seller")) {
+                    if (createAccountQuestionField.getText().equalsIgnoreCase("seller")) {
                         user = User.createUser(userType.SELLER, newUsername, newPassword, email);
                         cardLayout.show(cardPanel, "SellerView");
                     } else if (createAccountQuestionField.getText().equalsIgnoreCase("buyer")) {
@@ -268,9 +235,8 @@ public class GUI extends Main {
                 }
             }
         });
-        createAccountCard.add(createAccountButton);
-        createAccountCard.add(backButton);
-        
+        createAccountCard.add(createAccountAction);
+
         return createAccountCard;
     }
 
@@ -282,7 +248,7 @@ public class GUI extends Main {
         createReadAll.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "ReadMessages");
+                cardLayout.show(cardPanel, "ReadAll");
             }
         });
         createSellerView.add(createReadAll);
@@ -610,5 +576,33 @@ public class GUI extends Main {
         manageStores.add(backButton);
 
         return manageStores;
+    }
+    private JPanel createNewRealAll() {
+        JPanel realAll = new JPanel();
+        realAll.setLayout(new GridLayout(4, 2));
+        realAll.add(new JLabel("test"));
+        ArrayList<User> list = db.getAllCorrespondents(user);
+        realAll.add(new JLabel(list));
+        realAll.add(new JLabel("Enter the username for the messages you would like to view"));
+        JTextField newUsernameField = new JTextField();
+        realAll.add(newUsernameField);
+        JButton searchButton = new JButton("Search");
+        searchButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "SellerView");
+            }
+        });
+        realAll.add(searchButton);
+        JButton backButton = new JButton("Back");
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "SellerView");
+            }
+        });
+        realAll.add(backButton);
+
+        return realAll;
     }
 }
