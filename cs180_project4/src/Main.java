@@ -3,6 +3,10 @@ import java.util.UUID;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.File;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 public class Main {
     public static int openingPrompt(Scanner s) {
         System.out.println("Welcome!\n 1. Sign in to account\n 2. Create new Account");
@@ -69,7 +73,7 @@ public class Main {
         while (repeat) {
             int input = s.nextInt();
             switch (input) {
-                // TODO: implement menus for initial menu 
+                // TODO: implement menus for initial menu
                 case 1 -> readMessages(s, user);
                 case 2 -> sendMessage(s, user);
                 case 3 -> manageAccount(s, user);
@@ -90,7 +94,7 @@ public class Main {
         while (repeat == true) {
             int input = s.nextInt();
             switch (input) {
-                // TODO: implement menus for initial menu 
+                // TODO: implement menus for initial menu
                 case 1 -> readMessages(s, user);
                 case 2 -> sendMessage(s, user);
                 case 3 -> System.out.println(input);
@@ -215,7 +219,7 @@ public class Main {
         }
         return;
     }
-    
+
     public static void invisible(Scanner s, User thisUser) {
         boolean repeat = true;
         System.out.print("What would you like to do?\n");
@@ -271,20 +275,11 @@ public class Main {
         }
     }
     public static void main(String[] args) {
-        // ALL TESTS ARE NOW IN TEST.JAVA SO WE CAN START IMPLEMENTING MAIN METHOD
-        Scanner s = new Scanner(System.in);
-        int choice = openingPrompt(s);
-        User thisUser;
-        if (choice == 1) {
-            thisUser = loginToAccount(s);
-            if (thisUser.isType() == userType.SELLER) {
-               initMenuSeller(s, thisUser);
-            } else {
-                initMenuBuyer(s, thisUser); 
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new GUI();
             }
-        } else {
-            thisUser = createAccount(s);
-            menuSystem(s, thisUser);
-        }
+        });
     }
 }
