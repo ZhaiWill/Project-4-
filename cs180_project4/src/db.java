@@ -109,19 +109,37 @@ public class db {
         output.debugPrint("User deleted");
         return true;
     }
-    
+
     public static boolean editUsername(User user, String newUsername) {
-        if (db.getUser(user.getUsername()) != null) {
-            output.debugPrint("User with username {" + user.getUsername() + "} already exists.");
+        String oldUsername = user.getUsername();
+
+        if (getUser(newUsername) != null) {
+            output.debugPrint("User with username {" + newUsername + "} already exists.");
             return false;
+        } else {
+            user.setUsername(newUsername);
+            String oldFilePath = "storage/users/" + oldUsername + ".user";
+            String newFilePath = "storage/users/" + newUsername + ".user";
+            File oldFile = new File(oldFilePath);
+            File newFile = new File(newFilePath);
+            if (oldFile.exists()) {
+                if (oldFile.renameTo(newFile)) {
+                    output.debugPrint("Username updated. User file moved from " + oldFilePath + " to " + newFilePath);
+                } else {
+                    output.debugPrint("Failed to update username. Could not move user file.");
+                    return false;
+                }
+            } else {
+                output.debugPrint("User file not found at " + oldFilePath);
+                return false;
+            }
+
+            return true;
         }
-        user.setUsername(newUsername);
-        saveUser(user);
-        return true;
     }
 
-    public static boolean editPassword(User user, String newUsername) {
-        user.setPassword(newUsername);
+    public static boolean editPassword(User user, String newPassword) {
+        user.setPassword(newPassword);
         saveUser(user);
         return true;
     }

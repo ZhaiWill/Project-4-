@@ -52,7 +52,6 @@ public class User implements Serializable {
     public userType isType() {
         return type;
     }
-
     public String getUsername() {
         return username;
     }

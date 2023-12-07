@@ -115,18 +115,18 @@ public class Main {
             List<User> invisibleUsers1 = recepient.getInvisibleUsers();
             List<User> blockedUsers1 = sender.getBlockedUsers();
             if (invisibleUsers1.contains(sender)) {
-                System.out.println("Error, no user with username " + username + " found. Please try again");
+                JOptionPane.showMessageDialog(null, "Error no username called " + sender.getUsername() + " exists. Try Again", null, JOptionPane.INFORMATION_MESSAGE);
             }
                 Message message = new Message(sender, recepient, content);
                 if (message == null || recepient == null) {
-                    System.out.println("Error, invalid message, please try again");
+                    JOptionPane.showMessageDialog(null, "Error, invalid message, please try again", null, JOptionPane.INFORMATION_MESSAGE);
                 } else {
                     if (!blockedUsers1.contains(recepient)) {
                         db.saveMessage(message);
                         System.out.println("Message sent successfully");
                         break;
                     } else {
-                        System.out.println(sender.getUsername() + " is blocked by " + recepient.getUsername() + ". Message not sent.");
+                        JOptionPane.showMessageDialog(null, sender.getUsername() + " is blocked by " + recepient.getUsername() + ". Message not sent.", null, JOptionPane.INFORMATION_MESSAGE);
                         break;
                     }
                 }
