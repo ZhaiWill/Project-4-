@@ -162,7 +162,12 @@ public class GUI extends Main {
                 String password = signInPasswordField.getText();
                     if (user != null) {
                         if (user.getPassword().equals(password)) {
-                            cardLayout.show(cardPanel, "SellerView");
+                            frame.setTitle(username);
+                            if (user.isType() == userType.SELLER) {
+                                cardLayout.show(cardPanel, "SellerView");
+                            } else if (user.isType() == userType.CUSTOMER) {
+                                cardLayout.show(cardPanel, "BuyerView");
+                            }
                         } else {
                             JOptionPane.showMessageDialog(null, "Error, invalid password", null, JOptionPane.INFORMATION_MESSAGE);
                         }
@@ -223,6 +228,7 @@ public class GUI extends Main {
                 if(db.getUser(newUsername) != null) {
                     JOptionPane.showMessageDialog(null, "Username already exists", null, JOptionPane.INFORMATION_MESSAGE);
                 } else {
+                    frame.setTitle(newUsername);
                     if (createAccountQuestionField.getText().equalsIgnoreCase("seller")) {
                         user = User.createUser(userType.SELLER, newUsername, newPassword, email);
                         cardLayout.show(cardPanel, "SellerView");
@@ -324,7 +330,11 @@ public class GUI extends Main {
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "SellerView");
+                if (user.isType() == userType.SELLER) {
+                    cardLayout.show(cardPanel, "SellerView");
+                } else if (user.isType() == userType.CUSTOMER) {
+                    cardLayout.show(cardPanel, "BuyerView");
+                }
             }
         });
         createMessageCard.add(backButton);
@@ -373,7 +383,11 @@ public class GUI extends Main {
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "SellerView");
+                if (user.isType() == userType.SELLER) {
+                    cardLayout.show(cardPanel, "SellerView");
+                } else if (user.isType() == userType.CUSTOMER) {
+                    cardLayout.show(cardPanel, "BuyerView");
+                }
             }
         });
         createManageAccount.add(backButton);
@@ -399,7 +413,11 @@ public class GUI extends Main {
         noButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "SellerView");
+                if (user.isType() == userType.SELLER) {
+                    cardLayout.show(cardPanel, "SellerView");
+                } else if (user.isType() == userType.CUSTOMER) {
+                    cardLayout.show(cardPanel, "BuyerView");
+                }
             }
         });
         deleteAccount.add(noButton);
@@ -428,6 +446,8 @@ public class GUI extends Main {
                 String username = createNewUsernameField.getText();
                 if(db.editUsername(user, username) == true) {
                     JOptionPane.showMessageDialog(null, "Username has been changed succesfully", null, JOptionPane.INFORMATION_MESSAGE);
+                } else if(username == null) {
+                    JOptionPane.showMessageDialog(null, "Invalid Username", null, JOptionPane.INFORMATION_MESSAGE);
                 } else {
                     JOptionPane.showMessageDialog(null, "Username already exists", null, JOptionPane.INFORMATION_MESSAGE);
                 }
@@ -457,9 +477,7 @@ public class GUI extends Main {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String newPassword = createNewPasswordField.getText();
-                if (!newPassword.isEmpty()) {
-                    user.setPassword(newPassword);
-                    db.saveUser(user);
+                if (db.editPassword(user, newPassword) == true) {
                     JOptionPane.showMessageDialog(null, "Password has been changed succesfully", null, JOptionPane.INFORMATION_MESSAGE);
                 } else {
                     JOptionPane.showMessageDialog(null, "Please enter a new password", null, JOptionPane.INFORMATION_MESSAGE);
@@ -481,7 +499,7 @@ public class GUI extends Main {
 
     private JPanel newBlockUser() {
         JPanel blockUsers = new JPanel();
-        blockUsers.setLayout(new GridLayout(2, 2));
+        blockUsers.setLayout(new GridLayout(3, 2));
         blockUsers.add(new JLabel("Enter the username you would like to block"));
         JTextField createNewBlockUser = new JTextField();
         blockUsers.add(createNewBlockUser);
@@ -491,15 +509,37 @@ public class GUI extends Main {
             public void actionPerformed(ActionEvent e) {
                 String newuser = createNewBlockUser.getText();
                 user.blockUser(db.getUser(newuser));
+                db.saveUser(user);
                 JOptionPane.showMessageDialog(null, createNewBlockUser.getText() + " Has Been Successfully Blocked", "Greetings", JOptionPane.INFORMATION_MESSAGE);
             }
         });
         blockUsers.add(blockButton);
+        JButton unblockButton = new JButton("Unblock Person");
+        unblockButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String newUser = createNewBlockUser.getText();
+                User newUser2 = db.getUser(newUser);
+                List<String> blockedUsers1 = newUser2.getBlockedUsers();
+                if (blockedUsers1.contains(user.getUsername())) {
+                    JOptionPane.showMessageDialog(null, " You cannot unblock " + newUser, "Greetings", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    user.unblockUser(db.getUser(newUser));
+                    db.saveUser(user);
+                    JOptionPane.showMessageDialog(null, createNewBlockUser.getText() + " Has Been Successfully Unblocked", "Greetings", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
+        blockUsers.add(unblockButton);
         JButton backButton = new JButton("Back");
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "SellerView");
+                if (user.isType() == userType.SELLER) {
+                    cardLayout.show(cardPanel, "SellerView");
+                } else if (user.isType() == userType.CUSTOMER) {
+                    cardLayout.show(cardPanel, "BuyerView");
+                }
             }
         });
         blockUsers.add(backButton);
@@ -509,7 +549,7 @@ public class GUI extends Main {
 
     private JPanel newInvisibleUser() {
         JPanel invisibleUser = new JPanel();
-        invisibleUser.setLayout(new GridLayout(2, 2));
+        invisibleUser.setLayout(new GridLayout(3,2));
         invisibleUser.add(new JLabel("Enter the username you would like to be invisble to"));
         JTextField createNewInvisibleUser = new JTextField();
         invisibleUser.add(createNewInvisibleUser);
@@ -519,15 +559,31 @@ public class GUI extends Main {
             public void actionPerformed(ActionEvent e) {
                 String newuser = createNewInvisibleUser.getText();
                 user.becomeInvisible(db.getUser(newuser));
-                JOptionPane.showMessageDialog(null, "You have become invisible", "Greetings", JOptionPane.INFORMATION_MESSAGE);
+                db.saveUser(user);
+                JOptionPane.showMessageDialog(null, "You have become invisible", null, JOptionPane.INFORMATION_MESSAGE);
             }
         });
         invisibleUser.add(invisibleButton);
+        JButton visibleButton = new JButton("Become Visible");
+        visibleButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String newuser = createNewInvisibleUser.getText();
+                user.becomeUninvisible(db.getUser(newuser));
+                db.saveUser(user);
+                JOptionPane.showMessageDialog(null, "You have become visible", null , JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+        invisibleUser.add(visibleButton);
         JButton backButton = new JButton("Back");
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "SellerView");
+                if (user.isType() == userType.SELLER) {
+                    cardLayout.show(cardPanel, "SellerView");
+                } else if (user.isType() == userType.CUSTOMER) {
+                    cardLayout.show(cardPanel, "BuyerView");
+                }
             }
         });
         invisibleUser.add(backButton);
@@ -553,7 +609,11 @@ public class GUI extends Main {
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "SellerView");
+                if (user.isType() == userType.SELLER) {
+                    cardLayout.show(cardPanel, "SellerView");
+                } else if (user.isType() == userType.CUSTOMER) {
+                    cardLayout.show(cardPanel, "BuyerView");
+                }
             }
         });
         getAll.add(backButton);
@@ -570,7 +630,11 @@ public class GUI extends Main {
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "SellerView");
+                if (user.isType() == userType.SELLER) {
+                    cardLayout.show(cardPanel, "SellerView");
+                } else if (user.isType() == userType.CUSTOMER) {
+                    cardLayout.show(cardPanel, "BuyerView");
+                }
             }
         });
         manageStores.add(backButton);
@@ -580,9 +644,7 @@ public class GUI extends Main {
     private JPanel createNewRealAll() {
         JPanel realAll = new JPanel();
         realAll.setLayout(new GridLayout(4, 2));
-        realAll.add(new JLabel("test"));
-        ArrayList<User> list = db.getAllCorrespondents(user);
-        realAll.add(new JLabel(list));
+        realAll.add(new JLabel("list"));
         realAll.add(new JLabel("Enter the username for the messages you would like to view"));
         JTextField newUsernameField = new JTextField();
         realAll.add(newUsernameField);
@@ -590,7 +652,11 @@ public class GUI extends Main {
         searchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "SellerView");
+                if (user.isType() == userType.SELLER) {
+                    cardLayout.show(cardPanel, "SellerView");
+                } else if (user.isType() == userType.CUSTOMER) {
+                    cardLayout.show(cardPanel, "BuyerView");
+                }
             }
         });
         realAll.add(searchButton);
@@ -598,7 +664,11 @@ public class GUI extends Main {
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "SellerView");
+                if (user.isType() == userType.SELLER) {
+                    cardLayout.show(cardPanel, "SellerView");
+                } else if (user.isType() == userType.CUSTOMER) {
+                    cardLayout.show(cardPanel, "BuyerView");
+                }
             }
         });
         realAll.add(backButton);

@@ -103,7 +103,6 @@ public class db {
     public static boolean deleteUser(User user) {
         String username = user.getUsername();
         String filePath = "storage/users/" + username + ".user";
-
         File file = new File(filePath);
         file.delete();
         output.debugPrint("User deleted");
@@ -112,34 +111,27 @@ public class db {
 
     public static boolean editUsername(User user, String newUsername) {
         String oldUsername = user.getUsername();
-
         if (getUser(newUsername) != null) {
             output.debugPrint("User with username {" + newUsername + "} already exists.");
             return false;
         } else {
             user.setUsername(newUsername);
-            String oldFilePath = "storage/users/" + oldUsername + ".user";
-            String newFilePath = "storage/users/" + newUsername + ".user";
-            File oldFile = new File(oldFilePath);
-            File newFile = new File(newFilePath);
-            if (oldFile.exists()) {
-                if (oldFile.renameTo(newFile)) {
-                    output.debugPrint("Username updated. User file moved from " + oldFilePath + " to " + newFilePath);
+            if (user.getUsername() == newUsername) {
+                    saveUser(user);
+                    deleteUser(getUser(oldUsername));
+                    output.debugPrint("Username updated." );
                 } else {
-                    output.debugPrint("Failed to update username. Could not move user file.");
+                    output.debugPrint("Failed to update username.");
                     return false;
                 }
-            } else {
-                output.debugPrint("User file not found at " + oldFilePath);
-                return false;
             }
-
             return true;
         }
-    }
 
     public static boolean editPassword(User user, String newPassword) {
+       output.debugPrint(user.getPassword());
         user.setPassword(newPassword);
+        output.debugPrint(user.getPassword());
         saveUser(user);
         return true;
     }
