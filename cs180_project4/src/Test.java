@@ -8,6 +8,8 @@ public class Test {
 
         User user1 = User.createUser(userType.CUSTOMER, "john123", "abc123!!", "random@gmail.com");
         User user2 = User.createUser(userType.SELLER, "ANDY", "51242", "random2@gmail.com");
+        User user3 = User.createUser(userType.CUSTOMER, "test", "test", "test@gmail.com");
+        db.saveUser(user3);
         System.out.println(user1);
         System.out.println(db.getUser("john123"));
 
