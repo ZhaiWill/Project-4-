@@ -74,7 +74,7 @@ public class Main {
             int input = s.nextInt();
             switch (input) {
                 // TODO: implement menus for initial menu
-                case 1 -> readMessages(s, user);
+                case 1 -> System.out.println(input);
                 case 2 -> System.out.println(input);
                 case 3 -> manageAccount(s, user);
                 case 4 -> System.out.println(input);
@@ -95,7 +95,7 @@ public class Main {
             int input = s.nextInt();
             switch (input) {
                 // TODO: implement menus for initial menu
-                case 1 -> readMessages(s, user);
+                case 1 -> System.out.println(input);
                 case 2 -> System.out.println(input);
                 case 3 -> System.out.println(input);
                 case 4 -> System.out.println(input);
@@ -283,6 +283,7 @@ public class Main {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
+
                 new GUI();
             }
         });
