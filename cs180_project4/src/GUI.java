@@ -52,7 +52,6 @@ public class GUI extends Main {
         JPanel signInCard = createSignInCard();
         JPanel createAccountCard = createCreateAccountCard();
         JPanel buyerView = createNewBuyerView();
-        JPanel readAll = createNewReadAll();
         JPanel addStore = createAddStore();
         JPanel editStore = createEditStore();
         JPanel deleteStore = createDeleteStore();
@@ -75,7 +74,6 @@ public class GUI extends Main {
         cardPanel.add(editMessage, "EditMessage");
         cardPanel.add(manageMessages, "ManageMessages");
         cardPanel.add(deleteMessage, "DeleteMessage");
-        cardPanel.add(readAll, "ReadAll");
         cardPanel.add(addStore, "AddStore");
         cardPanel.add(editStore, "EditStore");
         cardPanel.add(deleteStore, "DeleteStore");
@@ -238,7 +236,7 @@ public class GUI extends Main {
         JPanel createSellerView = new JPanel();
         createSellerView.setLayout(new GridLayout(8, 1));
 
-        JButton createReadAll = new JButton("Read All Messages");
+        JButton createReadAll = new JButton("Read Messages");
         createReadAll.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -307,17 +305,30 @@ public class GUI extends Main {
     
     private JPanel readAllMessages() {
         JPanel getAll = new JPanel();
-        getAll.setLayout(new GridLayout(4, 2));
+        getAll.setLayout(new GridLayout(5, 2));
 
         JLabel label = new JLabel("Which User's messages would you like to read?");
         JTextField createGetAllUser = new JTextField();
         JButton getAllButton = new JButton("Search for Messages");
+        JButton searchAllButton = new JButton("Search for all users who have messaged you");
         JButton backButton = new JButton("Back");
 
         getAll.add(label);
         getAll.add(createGetAllUser);
         getAll.add(getAllButton);
+        getAll.add(searchAllButton);
         getAll.add(backButton);
+        searchAllButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ArrayList<String> correspondents = db.getAllNames(user);
+                if (correspondents.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "No one has messaged you.", null, JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(null, "These people have messaged you: " + correspondents, null, JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
 
         getAllButton.addActionListener(new ActionListener() {
             @Override
@@ -766,54 +777,6 @@ public class GUI extends Main {
         manageStores.add(backButton);
 
         return manageStores;
-    }
-    private JPanel createNewReadAll() {
-        JPanel realAll = new JPanel();
-        realAll.setLayout(new GridLayout(4, 2));
-        realAll.add(new JLabel("Enter the username for the messages you would like to view"));
-        JTextField newUsernameField = new JTextField();
-        realAll.add(newUsernameField);
-        JButton searchButton = new JButton("Search");
-        searchButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                User user1 = db.getUser(newUsernameField.getText());
-                ArrayList<Message> messages = db.findAllMessages(user, user1);
-                if(messages == null) {
-                    JOptionPane.showMessageDialog(null, "You have no messages from " + user1.getUsername(), null, JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    JOptionPane.showMessageDialog(null, messages.toString(), null, JOptionPane.INFORMATION_MESSAGE);
-                }
-            }
-        });
-        realAll.add(searchButton);
-        JButton searchAllButton = new JButton("Search for all users who have messaged you");
-        searchAllButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ArrayList<String> correspondents = db.getAllNames(user);
-                if (correspondents.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "No one has messaged you.", null, JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    JOptionPane.showMessageDialog(null, "These people have messaged you: " + correspondents, null, JOptionPane.INFORMATION_MESSAGE);
-                }
-            }
-        });
-        realAll.add(searchAllButton);
-        JButton backButton = new JButton("Back");
-        backButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (user.isType() == userType.SELLER) {
-                    cardLayout.show(cardPanel, "SellerView");
-                } else if (user.isType() == userType.CUSTOMER) {
-                    cardLayout.show(cardPanel, "BuyerView");
-                }
-            }
-        });
-        realAll.add(backButton);
-
-        return realAll;
     }
     public JPanel createAddStore() {
         JPanel createStore = new JPanel();

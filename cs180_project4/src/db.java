@@ -135,7 +135,7 @@ public class db {
             }
             return true;
         }
-
+    }
     public static boolean editPassword(User user, String newPassword) {
         user.setPassword(newPassword);
         saveUser(user);
