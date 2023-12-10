@@ -34,3 +34,37 @@ Steps:
 Expected result: Application creates an error window and the user is not allowed to access the account
 
 Test Status: Passed.
+
+Test 4: Messaging
+Steps:
+1. User logs in.
+2. User selects "Send Message" option.
+3. User sends another user a message.
+4. User logs out.
+5. User logs in under different user.
+6. User selects "Read message" option
+7. User enters other user's name
+
+Expected result: User is able to see message from other user.
+
+Test status: Passed.
+
+Test 5: Editing Account detials
+1. User signs in
+2. User selects "Manage Account"
+3. User selects "Change Username"
+4. User enters new username and presses "Change Username"
+
+Expected result: The username of the user will change (they will not be able to re-sign in on the original username)
+
+Test status: Passed.
+
+Test 6: Editing store details
+1. User signs in
+2. User selects "Manage Stores"
+3. User selects "Edit Store"
+4. User enters new store name and hits "Edit Store"
+
+Expected Result: Sellers should be able to see store under a different name.
+
+Test status: Passed.
