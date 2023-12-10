@@ -2,8 +2,13 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JButton;
@@ -11,6 +16,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.JPasswordField;
 public class GUI extends Main {
@@ -37,7 +43,12 @@ public class GUI extends Main {
         JPanel blockUser = newBlockUser();
         JPanel invisibleUser = newInvisibleUser();
         JPanel getAll = newGetAll();
+        JPanel readAll = readAllMessages();
+        JPanel manageMessages = createManageMessages();
+        JPanel editMessage = createEditMessagePanel();
+        JPanel deleteMessage = createDeleteMessage();
         JPanel manageStores = newManageStores();
+        JPanel createInitMenu = createInitMenu();
         JPanel signInCard = createSignInCard();
         JPanel createAccountCard = createCreateAccountCard();
         JPanel buyerView = createNewBuyerView();
@@ -50,44 +61,82 @@ public class GUI extends Main {
         cardPanel.add(sendMessage, "SendMessage");
         cardPanel.add(manageAccount, "ManageAccount");
         cardPanel.add(editPassword, "EditPassword");
+        cardPanel.add(readAll, "ReadAll");
         cardPanel.add(editUsername, "EditUsername");
         cardPanel.add(deleteAccount, "DeleteAccount");
         cardPanel.add(blockUser, "BlockUser");
+        cardPanel.add(manageStores, "ManageStores");
         cardPanel.add(invisibleUser, "InvisibleUser");
         cardPanel.add(getAll, "GetMessages");
+        cardPanel.add(createInitMenu, "InitMenu");
         cardPanel.add(signInCard, "SignInCard");
         cardPanel.add(createAccountCard, "CreateAccountCard");
         cardPanel.add(buyerView, "BuyerView");
+        cardPanel.add(editMessage, "EditMessage");
+        cardPanel.add(manageMessages, "ManageMessages");
+        cardPanel.add(deleteMessage, "DeleteMessage");
         cardPanel.add(readAll, "ReadAll");
         cardPanel.add(addStore, "AddStore");
         cardPanel.add(editStore, "EditStore");
         cardPanel.add(deleteStore, "DeleteStore");
         cardPanel.add(manageStores, "ManageStores");
         frame.add(cardPanel);
-        cardLayout.show(cardPanel, "SignInCard");
+        cardLayout.show(cardPanel, "InitMenu");
         frame.setVisible(true);
 
+    }
+
+    public JPanel createInitMenu() {
+        JPanel newInitMenu = new JPanel();
+
+        JButton signInButton = new JButton("Sign In");
+        JButton createAccountButton = new JButton("Create Account");
+
+        newInitMenu.add(createAccountButton);
+        newInitMenu.add(signInButton);
+
+        createAccountButton.setPreferredSize(new Dimension(350, 250));
+        signInButton.setPreferredSize(new Dimension(350, 250));
+
+        signInButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "SignInCard");
+            }
+        });
+
+        createAccountButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "CreateAccountCard");
+            }
+        });
+
+        return newInitMenu;
     }
 
     public JPanel createSignInCard() {
 
         JPanel signInCard = new JPanel();
-        signInCard.setLayout(new GridLayout(3, 2));
-        signInCard.add(new JLabel("Username:"));
-        JTextField signInUsernameField = new JTextField();
+        signInCard.setLayout(new GridLayout(4, 2));
+        JTextField signInUsernameField = new JTextField( 10);
+        signInUsernameField.setText("Username: ");
         signInCard.add(signInUsernameField);
 
-        signInCard.add(new JLabel("Password:"));
-        JPasswordField signInPasswordField = new JPasswordField();
+        JTextField signInPasswordField = new JTextField(10);
+        signInPasswordField.setText("Password: ");
         signInCard.add(signInPasswordField);
         JButton signInAction = new JButton("Sign In");
-
+        JButton backButton = new JButton("Back");
+        signInAction.setPreferredSize(new Dimension(350, 250));
         signInAction.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String username = signInUsernameField.getText();
+                username = username.substring(username.indexOf(":") + 2, username.length());
                 user = db.getUser(username);
                 String password = signInPasswordField.getText();
+                password = password.substring(password.indexOf(":") + 2, password.length());
                     if (user != null) {
                         if (user.getPassword().equals(password)) {
                             frame.setTitle(username);
@@ -104,7 +153,24 @@ public class GUI extends Main {
                     }
             }
         });
+
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "InitMenu");
+            }
+        });
+
     signInCard.add(signInAction);
+    signInCard.add(backButton);
+
+    return signInCard;
+}
+
+    public JPanel createCreateAccountCard() {
+        JPanel createAccountCard = new JPanel();
+        createAccountCard.setLayout(new GridLayout(6, 1));
+
         JButton createAccountButton = new JButton("Create Account");
         createAccountButton.addActionListener(new ActionListener() {
             @Override
@@ -113,36 +179,39 @@ public class GUI extends Main {
             }
         });
 
-        signInCard.add(createAccountButton);
-            return signInCard;
-}
+        JButton backButton = new JButton("Back");
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "InitMenu");
+            }
+        });
 
-    public JPanel createCreateAccountCard() {
-        JPanel createAccountCard = new JPanel();
-        createAccountCard.setLayout(new GridLayout(5, 2));
-        createAccountCard.add(new JLabel("Username:"));
-        JTextField createAccountUsernameField = new JTextField();
+        createAccountCard.add(createAccountButton);
+        createAccountButton.setPreferredSize(new Dimension(350, 250));
+        JTextField createAccountUsernameField = new JTextField("Username: " , 30);
         createAccountCard.add(createAccountUsernameField);
 
-        createAccountCard.add(new JLabel("Password:"));
-        JPasswordField createAccountPasswordField = new JPasswordField();
+        JTextField createAccountPasswordField = new JTextField("Password: ", 30);
         createAccountCard.add(createAccountPasswordField);
 
-        createAccountCard.add(new JLabel("Email:"));
-        JTextField createAccountEmailField = new JTextField();
+        JTextField createAccountEmailField = new JTextField("Email: ", 30);
         createAccountCard.add(createAccountEmailField);
 
-        createAccountCard.add(new JLabel("Are you a Buyer or Seller?"));
-        JTextField createAccountQuestionField = new JTextField();
+        JTextField createAccountQuestionField = new JTextField("Are you a Buyer or Seller? ", 30);
         createAccountCard.add(createAccountQuestionField);
 
-        JButton createAccountAction = new JButton("Create Account");
-        createAccountAction.addActionListener(new ActionListener() {
+        createAccountButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String newUsername = createAccountUsernameField.getText();
+                newUsername = newUsername.substring(newUsername.indexOf(":") + 2, newUsername.length());
                 String newPassword = createAccountPasswordField.getText();
+                newPassword = newPassword.substring(newPassword.indexOf(":") + 2, newPassword.length());
                 String email = createAccountEmailField.getText();
+                email = email.substring(email.indexOf(":") + 2, email.length());
+                String type = createAccountQuestionField.getText();
+                type = type.substring(type.indexOf("?") + 2, type.length());
                 if(db.getUser(newUsername) != null) {
                     JOptionPane.showMessageDialog(null, "Username already exists", null, JOptionPane.INFORMATION_MESSAGE);
                 } else {
@@ -159,17 +228,12 @@ public class GUI extends Main {
                 }
             }
         });
-        createAccountCard.add(createAccountAction);
-        JButton backButton = new JButton("Back");
-        backButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel,"SignInCard");
-            }
-        });
+        createAccountCard.add(createAccountButton);
         createAccountCard.add(backButton);
+        
         return createAccountCard;
     }
+
     private JPanel createNewSellerView() {
         JPanel createSellerView = new JPanel();
         createSellerView.setLayout(new GridLayout(8, 1));
@@ -240,6 +304,120 @@ public class GUI extends Main {
         createSellerView.add(logOut);
         return createSellerView;
     }
+    
+    private JPanel readAllMessages() {
+        JPanel getAll = new JPanel();
+        getAll.setLayout(new GridLayout(4, 2));
+
+        JLabel label = new JLabel("Which User's messages would you like to read?");
+        JTextField createGetAllUser = new JTextField();
+        JButton getAllButton = new JButton("Search for Messages");
+        JButton backButton = new JButton("Back");
+
+        getAll.add(label);
+        getAll.add(createGetAllUser);
+        getAll.add(getAllButton);
+        getAll.add(backButton);
+
+        getAllButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String input = createGetAllUser.getText();
+                boolean found = false;
+
+                ArrayList<User> correspondents = db.getAllConversations(user);
+
+                for (User u : correspondents) {
+                    if (found) break;
+                    if (u.getUsername().equals(input)) {
+                        found = true;
+
+                        ArrayList<Message> messages = db.getConversation(user, u);
+
+                        JPanel messagePanel = new JPanel();
+                        messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.Y_AXIS));
+
+                        for (Message m : messages) {
+                            messagePanel.add(new JLabel("Sent by: " + m.getReceiver().getUsername() + ": " + m.getMessage()));
+                        }
+
+                        JOptionPane.showMessageDialog(null, messagePanel, "Messages", JOptionPane.PLAIN_MESSAGE);
+                    
+                    }
+                }
+
+                if (!found) {
+                    JOptionPane.showMessageDialog(null, "Sorry, you don't have correspondence with that User yet.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (user.isType().equals(userType.SELLER)) {
+                    cardLayout.show(cardPanel, "SellerView");
+                } else {
+                    cardLayout.show(cardPanel, "BuyerView");
+                }
+            }
+        });
+
+        return getAll;
+    }
+
+     private JPanel createManageMessages() {
+        JPanel manageMessages = new JPanel();
+        manageMessages.setLayout(new GridLayout(3, 2));
+
+        JButton editMessageButton = new JButton("Edit Message");
+        editMessageButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "EditMessage");
+            }
+        });
+        manageMessages.add(editMessageButton);
+
+        JButton deleteMessageButton = new JButton("Delete Message");
+        deleteMessageButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "DeleteMessage");
+            }
+        });
+        manageMessages.add(deleteMessageButton);
+
+        JButton backButton = new JButton("Back");
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (user.isType().equals(userType.SELLER)) {
+                    cardLayout.show(cardPanel, "SellerView");
+                } else {
+                    cardLayout.show(cardPanel, "BuyerView");
+                }
+            }
+        });
+        manageMessages.add(backButton);
+
+        return manageMessages;
+    }
+    
+    private JPanel createDeleteMessage() {
+        JPanel deleteMessage = new JPanel();
+
+        
+
+        return deleteMessage;
+    }
+
+    private JPanel createEditMessagePanel() {
+
+        JPanel editMessagePanel = new JPanel();
+        
+        return editMessagePanel;
+    }
 
     public JPanel createSendMessage() {
         JPanel createMessageCard = new JPanel();
@@ -254,9 +432,9 @@ public class GUI extends Main {
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (user.isType() == userType.SELLER) {
+                if (user.isType().equals(userType.SELLER)) {
                     cardLayout.show(cardPanel, "SellerView");
-                } else if (user.isType() == userType.CUSTOMER) {
+                } else {
                     cardLayout.show(cardPanel, "BuyerView");
                 }
             }
@@ -307,9 +485,9 @@ public class GUI extends Main {
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (user.isType() == userType.SELLER) {
+               if (user.isType().equals(userType.SELLER)) {
                     cardLayout.show(cardPanel, "SellerView");
-                } else if (user.isType() == userType.CUSTOMER) {
+                } else {
                     cardLayout.show(cardPanel, "BuyerView");
                 }
             }
@@ -352,7 +530,7 @@ public class GUI extends Main {
                 cardLayout.show(cardPanel, "ManageAccount");
             }
         });
-        deleteAccount.add(backButton);
+        deleteAccount.add(noButton);
 
         return deleteAccount;
     }
@@ -401,7 +579,9 @@ public class GUI extends Main {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String newPassword = createNewPasswordField.getText();
-                if (db.editPassword(user, newPassword) == true) {
+                if (!newPassword.isEmpty()) {
+                    user.setPassword(newPassword);
+                    db.saveUser(user);
                     JOptionPane.showMessageDialog(null, "Password has been changed succesfully", null, JOptionPane.INFORMATION_MESSAGE);
                 } else {
                     JOptionPane.showMessageDialog(null, "Please enter a new password", null, JOptionPane.INFORMATION_MESSAGE);
@@ -459,9 +639,9 @@ public class GUI extends Main {
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (user.isType() == userType.SELLER) {
+                if (user.isType().equals(userType.SELLER)) {
                     cardLayout.show(cardPanel, "SellerView");
-                } else if (user.isType() == userType.CUSTOMER) {
+                } else {
                     cardLayout.show(cardPanel, "BuyerView");
                 }
             }
@@ -503,9 +683,9 @@ public class GUI extends Main {
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (user.isType() == userType.SELLER) {
+                if (user.isType().equals(userType.SELLER)) {
                     cardLayout.show(cardPanel, "SellerView");
-                } else if (user.isType() == userType.CUSTOMER) {
+                } else {
                     cardLayout.show(cardPanel, "BuyerView");
                 }
             }
