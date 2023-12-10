@@ -15,8 +15,8 @@ public class Test {
         assert user2 != null;
     
         user1.sendmessage(user2, "Hello, how are you?");
-        user1.sendmessage(user2, "I edge to your messages");
-        user2.sendmessage(user1, "I edge to your messages as well");
-        user2.sendmessage(user1, "You just broke my edging streak");
+        user1.sendmessage(user2, "I am doing well");
+        user2.sendmessage(user1, "That's nice to hear");
+        user2.sendmessage(user1, "How are you doing?");
     }
 }

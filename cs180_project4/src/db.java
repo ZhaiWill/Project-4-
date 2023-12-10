@@ -445,28 +445,6 @@ public class db {
         return null;
     }
 
-    public static Item saveItem(Store store, Item item) {
-        String itemName = item.getName();
-        String storeName = store.getName();
-        
-        String storeDirPath = root + "/stores/" + storeName;
-
-        createDirectory(storeDirPath);
-
-        String itemFilePath = storeDirPath + "/" + itemName + ".item";
-
-        try (FileOutputStream senderOutputStream = new FileOutputStream(itemFilePath);
-             ObjectOutputStream senderObjectOutputStream = new ObjectOutputStream(senderOutputStream)){
-
-            senderObjectOutputStream.writeObject(item);
-            output.debugPrint("Wrote object to " + itemFilePath);
-        } catch (IOException e) {
-            output.debugPrint("Failed to write item to " + itemFilePath);
-            output.debugPrint(Arrays.toString(e.getStackTrace()));
-            return null;
-        }
-        return item;
-    }
 
     public static void deleteDir(File file) {
         File[] contents = file.listFiles();
@@ -504,36 +482,7 @@ public class db {
         }
         return true;
     }
-    public static boolean removeItem(Store store, Item item) {
-        String itemName = item.getName();
-        String storeName = store.getName();
-
-        String storeDirPath = root + "/stores/" + storeName;
-        String itemFilePath = storeDirPath + "/" + itemName + ".item";
-
-        File f = new File(itemFilePath);
-        f.delete();
-        return true;
-    }
-
-    public static Item readItemFromFile(Store store, String itemName) {
-
-        String storeName = store.getName();
-        String storeDirPath = root + "/stores/" + storeName;
-        String itemFilePath = storeDirPath + "/" + itemName + ".item";
-
-        try (FileInputStream fileInputStream = new FileInputStream(itemFilePath);
-             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
-
-            Item newItem = (Item) objectInputStream.readObject();
-            output.debugPrint("Message deserialized from " + itemFilePath);
-            return newItem;
-        } catch (Exception e) {
-            output.debugPrint("Failed to get message from " + itemFilePath);
-            output.debugPrint(Arrays.toString(e.getStackTrace()));
-            return null;
-        }
-    }
+   
 
     public static Store readStoreFromFile(String storeName){
 
@@ -553,29 +502,6 @@ public class db {
         }
     }
 
-   public static boolean buyItem(Store store, String itemName, int quantity) {
-        Item item = readItemFromFile(store, itemName);
-        if (item.getQuantity() - quantity < 0) {
-            output.debugPrint("Cannot have items with quantity less than 0");
-            return false;
-        }
-        item.setQuantity(item.getQuantity() - quantity);
-        db.saveItem(store, item);
-        output.debugPrint("Bought item successfully");
-        return true;
-    }
-
-    public static boolean restockItem(Store store, String itemName, int quantity) {
-        Item item = readItemFromFile(store, itemName);
-        if (quantity <= 0) {
-            output.debugPrint("Cannot restock item with quantity less than or equal to zero");
-            return false;
-        }
-        item.setQuantity(item.getQuantity() + quantity);
-        db.saveItem(store, item);
-        output.debugPrint("Restocked item successfully");
-        return true;
-    }
 
      //HELPER METHODS
 
