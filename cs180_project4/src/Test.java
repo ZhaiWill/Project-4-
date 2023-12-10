@@ -18,6 +18,5 @@ public class Test {
         user1.sendmessage(user2, "I edge to your messages");
         user2.sendmessage(user1, "I edge to your messages as well");
         user2.sendmessage(user1, "You just broke my edging streak");
-        ArrayList<User> users = db.getAllCorrespondents(user1);
     }
 }

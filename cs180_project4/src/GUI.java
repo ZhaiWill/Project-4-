@@ -37,6 +37,7 @@ public class GUI extends Main {
         JPanel sellerView = createNewSellerView();
         JPanel sendMessage = createSendMessage();
         JPanel manageAccount = createNewManageAccount();
+        JPanel browseStores = browseStores();
         JPanel editUsername = createNewUsername();
         JPanel editPassword = createNewPassword();
         JPanel deleteAccount = newDeleteAccount();
@@ -64,6 +65,7 @@ public class GUI extends Main {
         cardPanel.add(editUsername, "EditUsername");
         cardPanel.add(deleteAccount, "DeleteAccount");
         cardPanel.add(blockUser, "BlockUser");
+        cardPanel.add(browseStores, "BrowseStores");
         cardPanel.add(manageStores, "ManageStores");
         cardPanel.add(invisibleUser, "InvisibleUser");
         cardPanel.add(getAll, "GetMessages");
@@ -415,6 +417,59 @@ public class GUI extends Main {
         return manageMessages;
     }
     
+    private JPanel browseStores() {
+        JPanel browseStores = new JPanel();
+        
+        browseStores.setLayout(new GridLayout(4, 2));
+        browseStores.add(new JLabel("Enter Message Recipient From Stores"));
+        JTextField createMessageRecipient = new JTextField();
+        browseStores.add(createMessageRecipient);
+        browseStores.add(new JLabel("Enter Message"));
+        JTextField createMessageInfo = new JTextField();
+        browseStores.add(createMessageInfo);
+        JButton backButton = new JButton("Back");
+        JButton viewStores = new JButton("View Stores to Message Owners");
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "BuyerView");
+            }
+        });
+        browseStores.add(backButton);
+        JButton sendMessageButton = new JButton("Send Message");
+        sendMessageButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String recipient = createMessageRecipient.getText();
+                String content = createMessageInfo.getText();
+                Main.sendMessage(recipient, user, content);
+            }
+        });
+
+        viewStores.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ArrayList<Store> stores = db.getAllStores();
+                JPanel messagePanel = new JPanel();
+                messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.Y_AXIS));
+                if (stores.isEmpty()) {
+                    messagePanel.add(new JLabel("No Available Stores"));
+                } else {
+                for (Store s : stores) {
+                    messagePanel.add(new JLabel("Store owner: " + s.getOwner().getUsername() + " | Store name: " + s.getName()));
+                    }
+                }
+                JOptionPane.showMessageDialog(null, messagePanel, "Stores", JOptionPane.PLAIN_MESSAGE);
+            }
+        });
+        
+        browseStores.add(viewStores);
+        browseStores.add(sendMessageButton);
+        
+        return browseStores;
+    }
+
+
     private JPanel createDeleteMessage() {
         JPanel deleteMessage = new JPanel();
 
@@ -919,16 +974,7 @@ public class GUI extends Main {
         createBrowseStores.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ArrayList<String> stores = db.getAllStoreNames();
-                Object[] stores2 = stores.toArray();
-                JPanel panel = new JPanel();
-                int browse = JOptionPane.showOptionDialog(null, "Which store would you like to message?", "Store",
-                        0, stores.size(), null, stores2, stores2[0]);
-                String storeName = stores.get(browse);
-                Store storeFromArray = db.getStore(storeName);
-                User owner = storeFromArray.getOwner();
-                cardLayout.show(cardPanel, "SendMessage");
-                createMessageRecipient.setText(owner.getUsername());
+                cardLayout.show(cardPanel, "BrowseStores");
             }
         });
         createBuyerView.add(createBrowseStores);
