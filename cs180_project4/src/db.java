@@ -1,8 +1,5 @@
 import java.io.*;
-import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.*;
 
 public class db {
     private static String root = "storage";
@@ -51,8 +48,8 @@ public class db {
         String usersDirectoryPath = root + "/users";
         String messagesDirectoryPath = root + "/messages";
         String storesDirectoryPath = root + "/stores";
-        
-        if (createDirectory(usersDirectoryPath) && createDirectory(messagesDirectoryPath)  && createDirectory(storesDirectoryPath)) {
+
+        if (createDirectory(usersDirectoryPath) && createDirectory(messagesDirectoryPath) && createDirectory(storesDirectoryPath)) {
             output.debugPrint("User and messages directories created.");
             return true;
         } else {
@@ -68,6 +65,7 @@ public class db {
         }
         return true;
     }
+
     //CAUTION. WILL OVERWRITE
     public static User saveUser(User user) {
         //if (user == null) return null;
@@ -109,7 +107,32 @@ public class db {
         output.debugPrint("User deleted");
         return true;
     }
-    
+
+    public static ArrayList<User> getAllUsers() {
+        ArrayList<User> users = new ArrayList<>();
+        File usersDirectory = new File(root + "/users");
+
+        if (usersDirectory.exists() && usersDirectory.isDirectory()) {
+            File[] userFiles = usersDirectory.listFiles();
+
+            if (userFiles != null) {
+                for (File userFile : userFiles) {
+                    try (FileInputStream fileInputStream = new FileInputStream(userFile);
+                         ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
+
+                        User user = (User) objectInputStream.readObject();
+                        users.add(user);
+                    } catch (IOException | ClassNotFoundException e) {
+                        output.debugPrint("Failed to read user from " + userFile.getPath());
+                        output.debugPrint(Arrays.toString(e.getStackTrace()));
+                    }
+                }
+            }
+        }
+
+        return users;
+    }
+
     public static boolean editUsername(User user, String newUsername) {
         if (db.getUser(user.getUsername()) != null) {
             output.debugPrint("User with username {" + user.getUsername() + "} already exists.");
@@ -126,8 +149,7 @@ public class db {
         return true;
     }
 
-    public static Message saveMessage(Message message) {
-        if (!Message.isValidMessage(message)) return null;
+    public static Message createMessage(Message message) {
         String senderUsername = message.getSender().getUsername();
         String receiverUsername = message.getReceiver().getUsername();
         String uuid = message.getUuid().toString();
@@ -216,6 +238,7 @@ public class db {
             saveEditedMessage(message, newContent, message.receiver);
         }
     }
+
     private static void saveEditedMessage(Message message, String newContent, User user) {
         String filePath = getMessageFilePath(user, message);
 
@@ -230,7 +253,7 @@ public class db {
         }
     }
 
-    public static boolean removeMessage(User user, Message message) {
+    public static boolean deleteMessage(User user, Message message) {
         String uuid = message.getUuid().toString();
         boolean isDeleterSender = user.username.equals(message.getSender().username);
         String filepath = root + "/messages/";
@@ -252,91 +275,6 @@ public class db {
         return true;
     }
 
-    public static ArrayList<User> getAllCorrespondents(User u) { //returns an arraylist of all people who have sent a message to u
-        ArrayList<User> correspondents = new ArrayList<User>();
-        String fileName = root + "/messages/" + u.getUsername();
-        String receivedName = fileName + "/received";
-        String sentName = fileName + "/sent";
-        try {
-            File f = new File(fileName);
-            File[] files = f.listFiles();
-            for (File thing : files) {
-                File[] deepestLayer = thing.listFiles();
-                for (File deepestFile : deepestLayer) {
-                    String absPath = deepestFile.getAbsolutePath();
-                    int index = absPath.lastIndexOf("/");
-                    String otherUser = absPath.substring(index);
-                    if (correspondents.indexOf(getUser(otherUser)) == -1) {
-                        correspondents.add(getUser(otherUser));
-                    }
-                }
-            }
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return correspondents;
-    }
-
-    
-    public static ArrayList<Message> findAllMessages(User user1, User user2) { // returns all messages between user1 and user2 in order
-        ArrayList<Message> messageLog = new ArrayList<Message>();
-        String username1 = user1.getUsername();
-        String username2 = user2.getUsername();
-        String filePath1 = "storage/messages" + username1 + "/sent/" + username2;
-        String filePath2 = "storage/messages" + username2 + "/sent/" + username1;
-        try {
-            File f1 = new File(filePath1);
-            File[] f1Array = f1.listFiles();
-            Message[] f1MessageArray = new Message[f1Array.length];
-            File f2 = new File(filePath2);
-            File[] f2Array = f2.listFiles();
-            Message[] f2MessageArray = new Message[f2Array.length];
-            for (int i = 0; i < f1Array.length; i++) {
-                Message m1 = readMessageFromFile(f1Array[i].getPath());
-                Message m2 = readMessageFromFile(f2Array[i].getPath());
-                f1MessageArray[i] = m1;
-                f2MessageArray[i] = m2;
-            }
-            messageLog.add(f1MessageArray[0]);
-            boolean added = false;
-            for (int i = 1; i < f1MessageArray.length; i++) { //sorting
-                Date ts = f1MessageArray[i].getTimestamp();
-                for (int j = 0; j < messageLog.size(); j++) {
-                    Date ts2 = messageLog.get(j).getTimestamp();
-                    if (ts.compareTo(ts2) > 0) {
-                        messageLog.add(j, f1MessageArray[i]);
-                        added = true;
-                    }
-                    if (!added) {
-                        messageLog.add(f1MessageArray[i]);
-                    }
-                    added = false;
-                }
-            }
-            for (int i = 1; i < f2MessageArray.length; i++) { //sorting
-                Date ts = f2MessageArray[i].getTimestamp();
-                for (int j = 0; j < messageLog.size(); j++) {
-                    Date ts2 = messageLog.get(j).getTimestamp();
-                    if (ts.compareTo(ts2) > 0) {// compareto > 0 when ts is before ts2
-                        messageLog.add(j, f2MessageArray[i]); // add it before whatever its before first
-                        added = true;
-                    }
-                    if (!added) {
-                        messageLog.add(f2MessageArray[i]); //if not inserted already, put at end
-                    }
-                    added = false;
-                }
-            }
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return messageLog;
-    }
-    
     //HELPER METHODS
     private static String getMessageFilePath(User user, Message message) {
         String senderUsername = message.getSender().getUsername();
@@ -356,26 +294,110 @@ public class db {
 
         return filePath;
     }
+
     private static boolean isMessageDeleted(User user, Message message) {
         String filePath = getMessageFilePath(user, message);
 
         File messageFile = new File(filePath);
         return !messageFile.exists();
     }
+
+    public static ArrayList<Message> getConversation(User viewer, User otherParticipant) {
+        ArrayList<Message> conversation = new ArrayList<>();
+
+        // Retrieve messages sent from the viewer to the other participant
+        String sentMessagesPath = root + "/messages/" + viewer.getUsername() + "/sent/" + otherParticipant.getUsername();
+        getConversationHelper(conversation, sentMessagesPath);
+
+        // Retrieve messages received by the viewer from the other participant
+        String receivedMessagesPath = root + "/messages/" + viewer.getUsername() + "/received/" + otherParticipant.getUsername();
+        getConversationHelper(conversation, receivedMessagesPath);
+
+        // Sort messages by timestamp
+        conversation.sort(Comparator.comparing(Message::getTimestamp));
+
+        return conversation;
+    }
+
+    private static void getConversationHelper(ArrayList<Message> conversation, String folderPath) {
+        File folder = new File(folderPath);
+        if (folder.exists() && folder.isDirectory()) {
+            File[] messageFiles = folder.listFiles();
+
+            if (messageFiles != null) {
+                for (File messageFile : messageFiles) {
+                    Message message = readMessageFromFile(messageFile.getPath());
+                    if (message != null) {
+                        conversation.add(message);
+                    }
+                }
+            }
+        }
+    }
+
+
+    public static ArrayList<User> getAllConversations(User user) {
+        ArrayList<User> conversations = new ArrayList<>();
+        String userMessagesPath = root + "/messages/" + user.getUsername();
+
+        File sentDirectory = new File(userMessagesPath + "/sent");
+        File receivedDirectory = new File(userMessagesPath + "/received");
+
+        // Get unique User objects from sent messages
+        if (sentDirectory.exists() && sentDirectory.isDirectory()) {
+            File[] sentDirs = sentDirectory.listFiles();
+
+            if (sentDirs != null) {
+                for (File receiverDir : sentDirs) {
+                    String username = receiverDir.getName();
+                    User conversationUser = getUser(username);
+                    if (conversationUser != null) {
+                        conversations.add(conversationUser);
+                    }
+                }
+            }
+        }
+
+        // Get unique User objects from received messages
+        if (receivedDirectory.exists() && receivedDirectory.isDirectory()) {
+            File[] receivedDirs = receivedDirectory.listFiles();
+
+            if (receivedDirs != null) {
+                for (File senderDir : receivedDirs) {
+                    String username = senderDir.getName();
+                    User conversationUser = getUser(username);
+                    if (conversationUser != null) {
+                        conversations.add(conversationUser);
+                    }
+                }
+            }
+        }
+
+        // Remove duplicates and alphabetically sort
+        HashSet<User> uniqueUsers = new HashSet<>(conversations);
+        conversations.clear();
+        conversations.addAll(uniqueUsers);
+        Collections.sort(conversations, Comparator.comparing(User::getUsername));
+
+        return conversations;
+    }
+
+
+    //handling stores and all that stuff
     public static Store saveStore(Store store) {
-        if (db.readStoreFromFile(store.getName()) != null) {
+        if (db.readStoreFromFile(store.getStoreName()) != null) {
             output.debugPrint("Stores cannot have the same name");
             return null;
         }
-        String dirPath = "storage/stores/" + store.getName() + "/";
-        String filePath = dirPath + store.getName() + ".storeInfo";
+        String dirPath = "storage/stores/";
+        String filePath = dirPath + store.getStoreName() + ".storeInfo";
         createDirectory(dirPath);
 
-        try (FileOutputStream fileOutputStream = new FileOutputStream(filePath); 
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream)) {
+        try (FileOutputStream fileOutputStream = new FileOutputStream(filePath);
+             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream)) {
 
             objectOutputStream.writeObject(store);
-            output.debugPrint("Store serialized and saved to " + store.getName() + ".storeInfo");
+            output.debugPrint("Store serialized and saved to " + store.getStoreName() + ".storeInfo");
         } catch (IOException e) {
             output.debugPrint("Failed to save user to " + dirPath);
             output.debugPrint(Arrays.toString(e.getStackTrace()));
@@ -384,90 +406,47 @@ public class db {
         return store;
     }
 
-    public static Item saveItem(Store store, Item item) {
-        String itemName = item.getName();
-        String storeName = store.getName();
-        
-        String storeDirPath = root + "/stores/" + storeName;
-
-        createDirectory(storeDirPath);
-
-        String itemFilePath = storeDirPath + "/" + itemName + ".item";
-
-        try (FileOutputStream senderOutputStream = new FileOutputStream(itemFilePath);
-             ObjectOutputStream senderObjectOutputStream = new ObjectOutputStream(senderOutputStream)){
-
-            senderObjectOutputStream.writeObject(item);
-            output.debugPrint("Wrote object to " + itemFilePath);
-        } catch (IOException e) {
-            output.debugPrint("Failed to write item to " + itemFilePath);
-            output.debugPrint(Arrays.toString(e.getStackTrace()));
-            return null;
-        }
-        return item;
-    }
-
-    public static void deleteDir(File file) {
-        File[] contents = file.listFiles();
-        if (contents != null) {
-            for (File f : contents) {
-                if (! Files.isSymbolicLink(f.toPath())) {
-                deleteDir(f);
-                }
-            }
-        }
-        file.delete();
-    }
-
     public static boolean removeStore(String storeName) {
         String storeDirPath = root + "/stores/" + storeName;
         File f = new File(storeDirPath);
-        deleteDir(f);
-        return true;
-    }
-    
-    public static boolean removeItem(Store store, Item item) {
-        String itemName = item.getName();
-        String storeName = store.getName();
-        
-        String storeDirPath = root + "/stores/" + storeName;
-        String itemFilePath = storeDirPath + "/" + itemName + ".item";
-
-        File f = new File(itemFilePath);
-        f.delete();
+        deleteDirectory(f);
         return true;
     }
 
-    public static Item readItemFromFile(Store store, String itemName) {
-        
-        String storeName = store.getName();
-        
-        String storeDirPath = root + "/stores/" + storeName;
-        String itemFilePath = storeDirPath + "/" + itemName + ".item";
-        
-        try (FileInputStream fileInputStream = new FileInputStream(itemFilePath);
-             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
-            
-            Item newItem = (Item) objectInputStream.readObject();
-            output.debugPrint("Message deserialized from " + itemFilePath);
-            return newItem;
-        } catch (Exception e) {
-            output.debugPrint("Failed to get message from " + itemFilePath);
-            output.debugPrint(Arrays.toString(e.getStackTrace()));
-            return null;
+    public static ArrayList<Store> getAllStores() {
+        ArrayList<Store> Stores = new ArrayList<>();
+        File storeDirectory = new File(root + "/stores");
+        if (storeDirectory.exists() && storeDirectory.isDirectory()) {
+            File[] userFiles = storeDirectory.listFiles();
+
+            if (userFiles != null) {
+                for (File userFile : userFiles) {
+                    try (FileInputStream fileInputStream = new FileInputStream(userFile);
+                         ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
+
+                        Store store = (Store) objectInputStream.readObject();
+                        Stores.add(store);
+                    } catch (IOException | ClassNotFoundException e) {
+                        output.debugPrint("Failed to read store from " + userFile.getPath());
+                        output.debugPrint(Arrays.toString(e.getStackTrace()));
+                    }
+                }
+            }
         }
+
+        return Stores;
     }
 
-    public static Store readStoreFromFile(String storeName){
-        
-        String storeDirPath = root + "/stores/" + storeName;
+    public static Store readStoreFromFile(String storeName) {
+
+        String storeDirPath = "storage/stores/";
         String itemFilePath = storeDirPath + "/" + storeName + ".storeInfo";
-        
+
         try (FileInputStream fileInputStream = new FileInputStream(itemFilePath);
              ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
-            
+
             Store newStore = (Store) objectInputStream.readObject();
-            output.debugPrint("Message deserialized from " + itemFilePath);
+            output.debugPrint("Store deserialized from " + itemFilePath);
             return newStore;
         } catch (Exception e) {
             output.debugPrint("Failed to get message from " + itemFilePath);
@@ -476,28 +455,4 @@ public class db {
         }
     }
 
-   public static boolean buyItem(Store store, String itemName, int quantity) {
-        Item item = readItemFromFile(store, itemName);
-        if (item.getQuantity() - quantity < 0) {
-            output.debugPrint("Cannot have items with quantity less than 0");
-            return false;
-        }
-        item.setQuantity(item.getQuantity() - quantity);
-        db.saveItem(store, item);
-        output.debugPrint("Bought item successfully");
-        return true;
-    }
-    
-    public static boolean restockItem(Store store, String itemName, int quantity) {
-        Item item = readItemFromFile(store, itemName);
-        if (quantity <= 0) {
-            output.debugPrint("Cannot restock item with quantity less than or equal to zero");
-            return false;
-        }
-        item.setQuantity(item.getQuantity() + quantity);
-        db.saveItem(store, item);
-        output.debugPrint("Restocked item successfully");
-        return true;
-    }
-    
 }

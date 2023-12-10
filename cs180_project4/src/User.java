@@ -1,18 +1,22 @@
-import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
+enum userType {
+    CUSTOMER, SELLER,
+}
+
+
+enum userBlockStatus {
+    INVISIBLE, BLOCKED, ALLOWED
+}
 
 public class User implements Serializable {
     userType type; //false = customer. true = seller
     String username;
     String password;
     String email;
-    List<User> blockedUsers;
-    List<User> invisibleUsers;
+    Map<String, userBlockStatus> userBlockStatusMap;
+
     public static User createUser(userType type, String username, String password, String email) {
         if (db.getUser(username) != null) {
             output.debugPrint("User with username {" + username + "} already exists.");
@@ -25,20 +29,17 @@ public class User implements Serializable {
     }
 
 
+    /**
+     * If return type is null the message can not be sent due to the user being blocked
+     *
+     * @param receiver
+     * @param message
+     * @return
+     */
     public Message sendmessage(User receiver, String message) {
+        if (receiver.getUserBlockedStatus(receiver) != userBlockStatus.ALLOWED) return null;
+        return db.createMessage(new Message(this, receiver, message));
 
-        return db.saveMessage(new Message(this, receiver, message));
-
-    }
-
-    public Message sendMessage(User receiver, File file) {
-        try {
-            String fileContents = new String(Files.readAllBytes(file.toPath()));
-            return db.saveMessage(new Message(this, receiver, fileContents));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null; 
-        }
     }
 
     private User(userType type, String username, String password, String email) {
@@ -46,9 +47,9 @@ public class User implements Serializable {
         this.username = username;
         this.password = password;
         this.email = email;
-        this.blockedUsers = new ArrayList<>();
-        this.invisibleUsers = new ArrayList<>();
+        this.userBlockStatusMap = new HashMap<String, userBlockStatus>();
     }
+
     public userType isType() {
         return type;
     }
@@ -69,31 +70,69 @@ public class User implements Serializable {
         this.password = password;
     }
 
-    public List<User> getInvisibleUsers() {
-        return invisibleUsers;
-    }
-    public List<User> getBlockedUsers() {
-        return blockedUsers;
+    /**
+     * Returns a user type object stating whether the user that userBlockedStatus is being called on has become invisble to or has blocked the user passed as input
+     *
+     * @param user
+     * @return
+     */
+    public userBlockStatus getUserBlockedStatus(User user) {
+        return this.userBlockStatusMap.getOrDefault(user.username, userBlockStatus.ALLOWED);
     }
 
-    @Override
     public String toString() {
         return "User{" + "type=" + type + ", username='" + username + '\'' + ", password='" + password + '\'' + ", email='" + email + '}';
     }
-    public void blockUser(User userToBlock) {
-        blockedUsers.add(userToBlock);
-        System.out.println(username + " has blocked " + userToBlock.getUsername());
+
+    public void setUserBlockStatus(String username, userBlockStatus blockStatus) {
+        this.userBlockStatusMap.put(username, blockStatus);
     }
-    public void unblockUser(User userToUnblock) {
-        blockedUsers.remove(userToUnblock);
-        System.out.println(username + " has unblocked " + userToUnblock.getUsername());
+
+    public ArrayList<User> getAllAccessibleUsers() {
+        //return all users that have getUserBlockedStatus return type of ALLOWED
+        ArrayList<User> accessibleUsers = new ArrayList<>();
+
+        for (User user : db.getAllUsers()) {
+            if (user.getUserBlockedStatus(this) != userBlockStatus.INVISIBLE && (this.type != user.type)) {
+                accessibleUsers.add(user);
+            }
+        }
+
+        return accessibleUsers;
     }
-    public void becomeInvisible(User invisible) {
-        invisibleUsers.add(invisible);
-        System.out.println("You have become invisible to: " + invisible.getUsername());
+    public ArrayList<Store> getAllAccessibleStores() {
+        //return all users that have getUserBlockedStatus return type of ALLOWED
+        ArrayList<Store> accessibleStores = new ArrayList<>();
+
+        for (Store store : db.getAllStores()) {
+            User storeOwner =db.getUser(store.getownerUserName());
+            if (storeOwner.getUserBlockedStatus(this) != userBlockStatus.INVISIBLE && (this.type != storeOwner.type)) {
+                accessibleStores.add(store);
+            }
+        }
+
+        return accessibleStores;
     }
-    public void becomeUninvisible(User unInvisible) {
-        invisibleUsers.remove(unInvisible);
-        System.out.println("You have become visible to: " + unInvisible.getUsername());
+
+
+    public ArrayList<String> getAllAccessibleConversations() {
+        ArrayList<User> allConversations = db.getAllConversations(this);
+        ArrayList<String> accessibleConversations = new ArrayList<>();
+
+        for (User user : allConversations) {
+            if (user.getUserBlockedStatus(this) != userBlockStatus.INVISIBLE && (this.type != user.type)) {
+                accessibleConversations.add(user.username);
+            }
+        }
+        //remove all duplicates accessibleConversations and sort alphabetically
+
+        ArrayList<String> uniqueAccessibleConversations = new ArrayList<>(new HashSet<>(accessibleConversations));
+        Collections.sort(uniqueAccessibleConversations);
+
+        return uniqueAccessibleConversations;
     }
+
+
+
+
 }

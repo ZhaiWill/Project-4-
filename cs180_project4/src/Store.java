@@ -1,44 +1,32 @@
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
+
 public class Store implements Serializable {
-    String name;
-    User owner;
-    ArrayList<Item> items;
-    
-    public Store(String name, User owner, ArrayList<Item> items) {
-        this.name = name;
-        this.owner = owner;
-        this.items = items;
+    String storeName;
+    String OwnerUserName;
+
+    public Store(String name, String ownerUserName) {
+        this.storeName = name;
+        this.OwnerUserName = ownerUserName;
     }
-    
-    public String getName() {
-        return name;
+
+    public String getStoreName() {
+        return storeName;
     }
-    public void setName(String name) {
-        this.name = name;
+
+    public void setStoreName(String storeName) {
+        this.storeName = storeName;
     }
-    public User getOwner() {
-        return owner;
+
+    public String getownerUserName() {
+        return OwnerUserName;
     }
-    public void setOwner(User owner) {
-        this.owner = owner;
-    }
-    public ArrayList<Item> getItems() {
-        return items;
-    }
-    public void setItems(ArrayList<Item> items) {
-        this.items = items;
-    }
-    public void addItem(Item item) {
-        this.items.add(item);
-    }
-    public void removeItem(Item item) {
-        this.items.remove(item);
-    }
+
+
+    @Override
     public String toString() {
-        return "Item<Owner=" + owner +
-        ", Name=" + name + ", items=" +
-        items + ">";
+        return "Store{" +
+                "storeName='" + storeName + '\'' +
+                ", OwnerUserName='" + OwnerUserName + '\'' +
+                '}';
     }
 }
