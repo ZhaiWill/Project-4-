@@ -1,9 +1,9 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 
 public class DBServer {
+    private static db dbInstance = new db();
     private static final int PORT = 12345;
 
     public static void main(String[] args) {
@@ -32,77 +32,77 @@ public class DBServer {
 
                 switch (methodName) {
                     case "clearDatabase":
-                        out.writeObject(db.clearDatabase());
+                        out.writeObject(dbInstance.clearDatabase());
                         break;
                     case "initializeDatabase":
-                        out.writeObject(db.initializeDatabase());
+                        out.writeObject(dbInstance.initializeDatabase());
                         break;
                     case "saveUser":
                         User userToSave = (User) in.readObject();
-                        out.writeObject(db.saveUser(userToSave));
+                        out.writeObject(dbInstance.saveUser(userToSave));
                         break;
                     case "getUser":
                         String username = (String) in.readObject();
-                        out.writeObject(db.getUser(username));
+                        out.writeObject(dbInstance.getUser(username));
                         break;
                     case "deleteUser":
                         User userToDelete = (User) in.readObject();
-                        out.writeObject(db.deleteUser(userToDelete));
+                        out.writeObject(dbInstance.deleteUser(userToDelete));
                         break;
                     case "getAllUsers":
-                        out.writeObject(db.getAllUsers());
+                        out.writeObject(dbInstance.getAllUsers());
                         break;
                     case "editUsername":
                         User userToEdit = (User) in.readObject();
                         String newUsername = (String) in.readObject();
-                        out.writeObject(db.editUsername(userToEdit, newUsername));
+                        out.writeObject(dbInstance.editUsername(userToEdit, newUsername));
                         break;
                     case "editPassword":
                         User userToEditPassword = (User) in.readObject();
                         String newPassword = (String) in.readObject();
-                        out.writeObject(db.editPassword(userToEditPassword, newPassword));
+                        out.writeObject(dbInstance.editPassword(userToEditPassword, newPassword));
                         break;
                     case "createMessage":
                         Message messageToCreate = (Message) in.readObject();
-                        out.writeObject(db.createMessage(messageToCreate));
+                        out.writeObject(dbInstance.createMessage(messageToCreate));
                         break;
                     case "getMessage":
                         String messageUuid = (String) in.readObject();
-                        out.writeObject(db.getMessage(messageUuid));
+                        out.writeObject(dbInstance.getMessage(messageUuid));
                         break;
                     case "editMessage":
                         Message messageToEdit = (Message) in.readObject();
                         String newContent = (String) in.readObject();
-                        db.editMessage(messageToEdit, newContent);
+                        dbInstance.editMessage(messageToEdit, newContent);
                         break;
                     case "deleteMessage":
                         User userDeletingMessage = (User) in.readObject();
                         Message messageToDelete = (Message) in.readObject();
-                        out.writeObject(db.deleteMessage(userDeletingMessage, messageToDelete));
+                        out.writeObject(dbInstance.deleteMessage(userDeletingMessage, messageToDelete));
                         break;
                     case "getConversation":
                         User viewer = (User) in.readObject();
                         User otherParticipant = (User) in.readObject();
-                        out.writeObject(db.getConversation(viewer, otherParticipant));
+                        out.writeObject(dbInstance.getConversation(viewer, otherParticipant));
                         break;
                     case "getAllConversations":
                         User userForConversations = (User) in.readObject();
-                        out.writeObject(db.getAllConversations(userForConversations));
+                        out.writeObject(dbInstance.getAllConversations(userForConversations));
                         break;
                     case "saveStore":
                         Store storeToSave = (Store) in.readObject();
-                        out.writeObject(db.saveStore(storeToSave));
+                        out.writeObject(dbInstance.saveStore(storeToSave));
                         break;
                     case "removeStore":
                         String storeNameToRemove = (String) in.readObject();
-                        out.writeObject(db.removeStore(storeNameToRemove));
+                        out.writeObject(dbInstance.removeStore(storeNameToRemove));
                         break;
                     case "getAllStores":
-                        out.writeObject(db.getAllStores());
+                        out.writeObject(dbInstance.getAllStores());
                         break;
                     case "readStoreFromFile":
                         String storeNameToRead = (String) in.readObject();
-                        out.writeObject(db.readStoreFromFile(storeNameToRead));
+                        out.writeObject(dbInstance.readStoreFromFile(storeNameToRead));
                         break;
                     default:
                         System.out.println("Unknown method: " + methodName);
