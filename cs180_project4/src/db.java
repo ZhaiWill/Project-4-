@@ -1,8 +1,11 @@
 import java.io.*;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 
 public class db {
     private static String root = "storage";
@@ -277,15 +280,19 @@ public class db {
         String sentName = fileName + "/sent";
         try {
             File f = new File(fileName);
-            File[] files = f.listFiles();
-            for (File thing : files) {
-                File[] deepestLayer = thing.listFiles();
-                for (File deepestFile : deepestLayer) {
-                    String absPath = deepestFile.getAbsolutePath();
-                    int index = absPath.lastIndexOf("/");
-                    String otherUser = absPath.substring(index);
-                    if (correspondents.indexOf(getUser(otherUser)) == -1) {
-                        correspondents.add(getUser(otherUser));
+            if (f.exists()) {
+                File[] files = f.listFiles();
+                for (File thing : files) {
+                    if (thing != null) {
+                    File[] deepestLayer = thing.listFiles();
+                    for (File deepestFile : deepestLayer) {
+                        String absPath = deepestFile.getAbsolutePath();
+                        int index = absPath.lastIndexOf("/");
+                        String otherUser = absPath.substring(index);
+                        if (correspondents.indexOf(getUser(otherUser)) == -1) {
+                            correspondents.add(getUser(otherUser));
+                            }
+                        }
                     }
                 }
             }
@@ -518,4 +525,116 @@ public class db {
         return true;
     }
     
+     //HELPER METHODS
+    
+
+  
+    public static ArrayList<Message> getConversation(User viewer, User otherParticipant) {
+        ArrayList<Message> conversation = new ArrayList<>();
+
+        // Retrieve messages sent from the viewer to the other participant
+        String sentMessagesPath = root + "/messages/" + viewer.getUsername() + "/sent/" + otherParticipant.getUsername();
+        getConversationHelper(conversation, sentMessagesPath);
+
+        // Retrieve messages received by the viewer from the other participant
+        String receivedMessagesPath = root + "/messages/" + viewer.getUsername() + "/received/" + otherParticipant.getUsername();
+        getConversationHelper(conversation, receivedMessagesPath);
+
+        // Sort messages by timestamp
+        conversation.sort(Comparator.comparing(Message::getTimestamp));
+
+        return conversation;
+    }
+
+    private static void getConversationHelper(ArrayList<Message> conversation, String folderPath) {
+        File folder = new File(folderPath);
+        if (folder.exists() && folder.isDirectory()) {
+            File[] messageFiles = folder.listFiles();
+
+            if (messageFiles != null) {
+                for (File messageFile : messageFiles) {
+                    Message message = readMessageFromFile(messageFile.getPath());
+                    if (message != null) {
+                        conversation.add(message);
+                    }
+                }
+            }
+        }
+    }
+
+
+    public static ArrayList<User> getAllConversations(User user) {
+        ArrayList<User> conversations = new ArrayList<>();
+        String userMessagesPath = root + "/messages/" + user.getUsername();
+
+        File sentDirectory = new File(userMessagesPath + "/sent");
+        File receivedDirectory = new File(userMessagesPath + "/received");
+
+        // Get unique User objects from sent messages
+        if (sentDirectory.exists() && sentDirectory.isDirectory()) {
+            File[] sentDirs = sentDirectory.listFiles();
+
+            if (sentDirs != null) {
+                for (File receiverDir : sentDirs) {
+                    String username = receiverDir.getName();
+                    User conversationUser = getUser(username);
+                    if (conversationUser != null) {
+                        conversations.add(conversationUser);
+                    }
+                }
+            }
+        }
+
+        // Get unique User objects from received messages
+        if (receivedDirectory.exists() && receivedDirectory.isDirectory()) {
+            File[] receivedDirs = receivedDirectory.listFiles();
+
+            if (receivedDirs != null) {
+                for (File senderDir : receivedDirs) {
+                    String username = senderDir.getName();
+                    User conversationUser = getUser(username);
+                    if (conversationUser != null) {
+                        conversations.add(conversationUser);
+                    }
+                }
+            }
+        }
+
+        // Remove duplicates and alphabetically sort
+        HashSet<User> uniqueUsers = new HashSet<>(conversations);
+        conversations.clear();
+        conversations.addAll(uniqueUsers);
+        Collections.sort(conversations, Comparator.comparing(User::getUsername));
+
+        return conversations;
+    }
+
+
+    //handling stores and all that stuff
+
+
+    public static ArrayList<Store> getAllStores() {
+        ArrayList<Store> Stores = new ArrayList<>();
+        File storeDirectory = new File(root + "/stores");
+        if (storeDirectory.exists() && storeDirectory.isDirectory()) {
+            File[] userFiles = storeDirectory.listFiles();
+
+            if (userFiles != null) {
+                for (File userFile : userFiles) {
+                    try (FileInputStream fileInputStream = new FileInputStream(userFile);
+                         ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
+
+                        Store store = (Store) objectInputStream.readObject();
+                        Stores.add(store);
+                    } catch (IOException | ClassNotFoundException e) {
+                        output.debugPrint("Failed to read store from " + userFile.getPath());
+                        output.debugPrint(Arrays.toString(e.getStackTrace()));
+                    }
+                }
+            }
+        }
+
+        return Stores;
+    }
+
 }

@@ -1,10 +1,12 @@
-import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -34,6 +36,7 @@ public class GUI extends Main {
         JPanel blockUser = newBlockUser();
         JPanel invisibleUser = newInvisibleUser();
         JPanel getAll = newGetAll();
+        JPanel readAll = readAllMessages();
         JPanel manageStores = newManageStores();
         JPanel createInitMenu = createInitMenu();
         JPanel signInCard = createSignInCard();
@@ -44,6 +47,7 @@ public class GUI extends Main {
         cardPanel.add(sendMessage, "SendMessage");
         cardPanel.add(manageAccount, "ManageAccount");
         cardPanel.add(editPassword, "EditPassword");
+        cardPanel.add(readAll, "ReadAll");
         cardPanel.add(editUsername, "EditUsername");
         cardPanel.add(deleteAccount, "DeleteAccount");
         cardPanel.add(blockUser, "BlockUser");
@@ -69,7 +73,7 @@ public class GUI extends Main {
         createReadAll.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "GetMessages");
+                cardLayout.show(cardPanel, "ReadAll");
             }
         });
         createBuyerView.add(createReadAll);
@@ -93,7 +97,7 @@ public class GUI extends Main {
         createBrowseStores.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "SendMessage");
+                //TODO: implement store browsing
             }
         });
         createBuyerView.add(createBrowseStores);
@@ -117,7 +121,7 @@ public class GUI extends Main {
         createManageMessages.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "SendMessage");
+                //TODO: implement editing/deleting messages.
             }
         });
         createBuyerView.add(createManageMessages);
@@ -164,7 +168,7 @@ public class GUI extends Main {
     public JPanel createSignInCard() {
 
         JPanel signInCard = new JPanel();
-        signInCard.setLayout(new GridLayout(5, 2));
+        signInCard.setLayout(new GridLayout(4, 2));
         JTextField signInUsernameField = new JTextField( 10);
         signInUsernameField.setText("Username: ");
         signInCard.add(signInUsernameField);
@@ -185,7 +189,11 @@ public class GUI extends Main {
                 password = password.substring(password.indexOf(":") + 2, password.length());
                     if (user != null) {
                         if (user.getPassword().equals(password)) {
-                            cardLayout.show(cardPanel, "SellerView");
+                            if (user.isType().equals(userType.SELLER)) {
+                                cardLayout.show(cardPanel, "SellerView");
+                            } else {
+                                cardLayout.show(cardPanel, "BuyerView");
+                            }
                         } else {
                             JOptionPane.showMessageDialog(null, "Error, invalid password", null, JOptionPane.INFORMATION_MESSAGE);
                         }
@@ -282,7 +290,7 @@ public class GUI extends Main {
         createReadAll.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "ReadMessages");
+                cardLayout.show(cardPanel, "ReadAll");
             }
         });
         createSellerView.add(createReadAll);
@@ -330,7 +338,7 @@ public class GUI extends Main {
         createManageMessages.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "SendMessage");
+                //TODO: implement editing/deleting messages.
             }
         });
         createSellerView.add(createManageMessages);
@@ -343,6 +351,63 @@ public class GUI extends Main {
         });
         createSellerView.add(logOut);
         return createSellerView;
+    }
+    
+    private JPanel readAllMessages() {
+        JPanel getAll = new JPanel();
+        getAll.setLayout(new GridLayout(4, 2));
+
+        JLabel label = new JLabel("Which User's messages would you like to read?");
+        JTextField createGetAllUser = new JTextField();
+        JButton getAllButton = new JButton("Search for Messages");
+        JButton backButton = new JButton("Back");
+
+        getAll.add(label);
+        getAll.add(createGetAllUser);
+        getAll.add(getAllButton);
+        getAll.add(backButton);
+
+        getAllButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String input = createGetAllUser.getText();
+                boolean found = false;
+
+                ArrayList<User> correspondents = db.getAllConversations(user);
+
+                for (User u : correspondents) {
+                    if (found) break;
+                    if (u.getUsername().equals(input)) {
+                        found = true;
+
+                        ArrayList<Message> messages = db.getConversation(user, u);
+
+                        JPanel messagePanel = new JPanel();
+                        messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.Y_AXIS));
+
+                        for (Message m : messages) {
+                            messagePanel.add(new JLabel("Sent by: " + m.getReceiver().getUsername() + ": " + m.getMessage()));
+                        }
+
+                        JOptionPane.showMessageDialog(null, messagePanel, "Messages", JOptionPane.PLAIN_MESSAGE);
+                    
+                    }
+                }
+
+                if (!found) {
+                    JOptionPane.showMessageDialog(null, "Sorry, you don't have correspondence with that User yet.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "SellerView");
+            }
+        });
+
+        return getAll;
     }
 
     private JPanel createSendMessage() {
@@ -358,7 +423,11 @@ public class GUI extends Main {
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "SellerView");
+                if (user.isType().equals(userType.SELLER)) {
+                    cardLayout.show(cardPanel, "SellerView");
+                } else {
+                    cardLayout.show(cardPanel, "BuyerView");
+                }
             }
         });
         createMessageCard.add(backButton);
@@ -369,7 +438,6 @@ public class GUI extends Main {
                 String recipient = createMessageRecipient.getText();
                 String content = createMessageInfo.getText();
                 Main.sendMessage(recipient, user, content);
-
             }
         });
         createMessageCard.add(sendMessageButton);
@@ -407,7 +475,11 @@ public class GUI extends Main {
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "SellerView");
+               if (user.isType().equals(userType.SELLER)) {
+                    cardLayout.show(cardPanel, "SellerView");
+                } else {
+                    cardLayout.show(cardPanel, "BuyerView");
+                }
             }
         });
         createManageAccount.add(backButton);
@@ -433,18 +505,10 @@ public class GUI extends Main {
         noButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "SellerView");
-            }
-        });
-        deleteAccount.add(noButton);
-        JButton backButton = new JButton("Back");
-        backButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
                 cardLayout.show(cardPanel, "ManageAccount");
             }
         });
-        deleteAccount.add(backButton);
+        deleteAccount.add(noButton);
 
         return deleteAccount;
     }
@@ -533,7 +597,11 @@ public class GUI extends Main {
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "SellerView");
+                if (user.isType().equals(userType.SELLER)) {
+                    cardLayout.show(cardPanel, "SellerView");
+                } else {
+                    cardLayout.show(cardPanel, "BuyerView");
+                }
             }
         });
         blockUsers.add(backButton);
@@ -561,7 +629,11 @@ public class GUI extends Main {
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "SellerView");
+                if (user.isType().equals(userType.SELLER)) {
+                    cardLayout.show(cardPanel, "SellerView");
+                } else {
+                    cardLayout.show(cardPanel, "BuyerView");
+                }
             }
         });
         invisibleUser.add(backButton);
