@@ -18,12 +18,12 @@ public class User implements Serializable {
     Map<String, userBlockStatus> userBlockStatusMap;
 
     public static User createUser(userType type, String username, String password, String email) {
-        if (db.getUser(username) != null) {
+        if (DBClient.getUser(username) != null) {
             output.debugPrint("User with username {" + username + "} already exists.");
             return null;
         }
         User user = new User(type, username, password, email);
-        db.saveUser(user);
+        DBClient.saveUser(user);
         output.debugPrint("Created and saved new User : " + user);
         return user;
     }
@@ -38,11 +38,11 @@ public class User implements Serializable {
      */
     public Message sendmessage(User receiver, String message) {
         if (receiver.getUserBlockedStatus(receiver) != userBlockStatus.ALLOWED) return null;
-        return db.createMessage(new Message(this, receiver, message));
+        return DBClient.createMessage(new Message(this, receiver, message));
 
     }
 
-    private User(userType type, String username, String password, String email) {
+    public User(userType type, String username, String password, String email) {
         this.type = type;
         this.username = username;
         this.password = password;
@@ -92,7 +92,7 @@ public class User implements Serializable {
         //return all users that have getUserBlockedStatus return type of ALLOWED
         ArrayList<User> accessibleUsers = new ArrayList<>();
 
-        for (User user : db.getAllUsers()) {
+        for (User user : DBClient.getAllUsers()) {
             if (user.getUserBlockedStatus(this) != userBlockStatus.INVISIBLE && (this.type != user.type)) {
                 accessibleUsers.add(user);
             }
@@ -104,8 +104,8 @@ public class User implements Serializable {
         //return all users that have getUserBlockedStatus return type of ALLOWED
         ArrayList<Store> accessibleStores = new ArrayList<>();
 
-        for (Store store : db.getAllStores()) {
-            User storeOwner =db.getUser(store.getownerUserName());
+        for (Store store : DBClient.getAllStores()) {
+            User storeOwner = DBClient.getUser(store.getownerUserName());
             if (storeOwner.getUserBlockedStatus(this) != userBlockStatus.INVISIBLE && (this.type != storeOwner.type)) {
                 accessibleStores.add(store);
             }
@@ -116,7 +116,7 @@ public class User implements Serializable {
 
 
     public ArrayList<String> getAllAccessibleConversations() {
-        ArrayList<User> allConversations = db.getAllConversations(this);
+        ArrayList<User> allConversations = DBClient.getAllConversations(this);
         ArrayList<String> accessibleConversations = new ArrayList<>();
 
         for (User user : allConversations) {

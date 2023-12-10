@@ -5,6 +5,8 @@ import java.util.*;
 
 public class UI {
 
+    DBClient dbClientInstance = new DBClient();
+
     Scanner scan;
     User loggedInUser;
 
@@ -54,18 +56,18 @@ public class UI {
     private void createNewStoreMenu() {
         String storeName = queryValue("What would you like to name your store?", true);
         Store newStore = new Store(storeName, this.loggedInUser.username);
-        if (db.readStoreFromFile(storeName) != null) {
+        if (dbClientInstance.readStoreFromFile(storeName) != null) {
             System.out.println("Sorry, a store with that name already exists");
             pressEnterToContinue();
             return;
         }
-        db.saveStore(newStore);
+        dbClientInstance.saveStore(newStore);
         System.out.println("Successfully created store " + newStore.storeName);
         pressEnterToContinue();
     }
 
     private void viewStoresMenu() {
-        ArrayList<Store> stores = db.getAllStores();
+        ArrayList<Store> stores = dbClientInstance.getAllStores();
         ArrayList<Store> storesOwnedByUser = new ArrayList<>();
         for (Store store : stores) {
             if (Objects.equals(store.OwnerUserName, this.loggedInUser.username)) {
@@ -94,7 +96,7 @@ public class UI {
         if (queryYesNo("Would you like to message one?")) {
             System.out.println("What store # would you like to message?");
             int storeNumber = getIntegerValue(0, stores.size() - 1);
-            sendMessageFinalMenu(db.getUser(stores.get(storeNumber).OwnerUserName));
+            sendMessageFinalMenu(dbClientInstance.getUser(stores.get(storeNumber).OwnerUserName));
         }
     }
 
@@ -114,7 +116,7 @@ public class UI {
     public void sendMessageMenu() {
         User recipientUser = null;
         while (recipientUser == null) {
-            recipientUser = db.getUser(queryValue("what user would you like to send a message to?", true));
+            recipientUser = dbClientInstance.getUser(queryValue("what user would you like to send a message to?", true));
 
             if (recipientUser == null) {
                 System.out.println("Sorry, a user with that username does not exist");
@@ -185,7 +187,7 @@ public class UI {
     }
 
     public void viewConversationWith(String username) {
-        ArrayList<Message> messages = db.getConversation(this.loggedInUser, db.getUser(username));
+        ArrayList<Message> messages = dbClientInstance.getConversation(this.loggedInUser, dbClientInstance.getUser(username));
 
         for (int i = 0; i < messages.size(); i++) {
             Message m = messages.get(i);
@@ -220,7 +222,7 @@ public class UI {
         int messageNumber = getIntegerValue(0, messages.size() - 1);
         Message m = messages.get(messageNumber);
 
-        db.deleteMessage(this.loggedInUser, m);
+        dbClientInstance.deleteMessage(this.loggedInUser, m);
         System.out.println("Successfully updated contents");
 
     }
@@ -233,7 +235,7 @@ public class UI {
             System.out.println("You can not edit a message that you did not send");
             return;
         }
-        db.editMessage(m, getMessageContents());
+        dbClientInstance.editMessage(m, getMessageContents());
         System.out.println("Successfully updated contents");
 
     }
@@ -245,7 +247,7 @@ public class UI {
                 case 0 -> {
                     System.out.println("Who would you like to block?");
                     String username = queryValue("username", false);
-                    User user = db.getUser(username);
+                    User user = dbClientInstance.getUser(username);
                     if (user == null) {
                         System.out.println("Sorry, a user with that username does not exist");
                         continue;
@@ -256,12 +258,12 @@ public class UI {
                     }
                     boolean invisibleModeBlock = queryYesNo(("Would you like to block this user in invisible mode?"));
                     this.loggedInUser.setUserBlockStatus(user.username, invisibleModeBlock ? userBlockStatus.INVISIBLE : userBlockStatus.BLOCKED);
-                    db.saveUser(this.loggedInUser);
+                    dbClientInstance.saveUser(this.loggedInUser);
                 }
                 case 1 -> {
                     System.out.println("Who would you like to unblock?");
                     String username = queryValue("username", false);
-                    User user = db.getUser(username);
+                    User user = dbClientInstance.getUser(username);
                     if (user == null) {
                         System.out.println("Sorry, a user with that username does not exist");
                         continue;
@@ -306,7 +308,7 @@ public class UI {
         boolean userCreated = false;
         do {
             String username = queryValue("username", false);
-            if (db.getUser(username) != null) {
+            if (dbClientInstance.getUser(username) != null) {
                 System.out.println("Sorry, that username is already taken");
                 continue;
             }
@@ -323,7 +325,7 @@ public class UI {
         do {
             String username = queryValue("username", false);
             String password = queryValue("password", false);
-            User user = db.getUser(username);
+            User user = dbClientInstance.getUser(username);
             if (user == null || !password.equals(user.password)) {
                 System.out.println("Sorry, your username or password is incorrect.");
                 continue;

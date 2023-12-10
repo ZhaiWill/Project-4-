@@ -68,6 +68,7 @@ public class db {
 
     //CAUTION. WILL OVERWRITE
     public static User saveUser(User user) {
+
         //if (user == null) return null;
         String filePath = "storage/users/" + user.getUsername() + ".user";
 
