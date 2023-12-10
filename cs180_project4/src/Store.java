@@ -4,12 +4,20 @@ import java.util.Arrays;
 public class Store implements Serializable {
     String name;
     User owner;
-    ArrayList<Item> items;
-    
-    public Store(String name, User owner, ArrayList<Item> items) {
+
+    public static Store createStore(String name, User user) {
+        if (db.getStore(name) != null) {
+            output.debugPrint("Store with name {" + name + "} already exists.");
+            return null;
+        }
+        Store store = new Store(name, user);
+        db.saveStore(store);
+        output.debugPrint("Created and saved new Store : " + store);
+        return store;
+    }
+    public Store(String name, User owner) {
         this.name = name;
         this.owner = owner;
-        this.items = items;
     }
     
     public String getName() {
@@ -24,21 +32,8 @@ public class Store implements Serializable {
     public void setOwner(User owner) {
         this.owner = owner;
     }
-    public ArrayList<Item> getItems() {
-        return items;
-    }
-    public void setItems(ArrayList<Item> items) {
-        this.items = items;
-    }
-    public void addItem(Item item) {
-        this.items.add(item);
-    }
-    public void removeItem(Item item) {
-        this.items.remove(item);
-    }
     public String toString() {
         return "Item<Owner=" + owner +
-        ", Name=" + name + ", items=" +
-        items + ">";
+        ", Name=" + name + ">";
     }
 }

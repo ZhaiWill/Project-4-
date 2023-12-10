@@ -1,3 +1,4 @@
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -8,6 +9,8 @@ import java.util.ArrayList;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -15,12 +18,14 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
-
+import javax.swing.JPasswordField;
 public class GUI extends Main {
     private JFrame frame;
     private JPanel cardPanel;
     private CardLayout cardLayout;
     public User user;
+    public Store store;
+    private JTextField createMessageRecipient;
     public GUI() {
         frame = new JFrame("Messaging App");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -47,6 +52,10 @@ public class GUI extends Main {
         JPanel signInCard = createSignInCard();
         JPanel createAccountCard = createCreateAccountCard();
         JPanel buyerView = createNewBuyerView();
+        JPanel readAll = createNewReadAll();
+        JPanel addStore = createAddStore();
+        JPanel editStore = createEditStore();
+        JPanel deleteStore = createDeleteStore();
 
         cardPanel.add(sellerView, "SellerView");
         cardPanel.add(sendMessage, "SendMessage");
@@ -66,81 +75,15 @@ public class GUI extends Main {
         cardPanel.add(editMessage, "EditMessage");
         cardPanel.add(manageMessages, "ManageMessages");
         cardPanel.add(deleteMessage, "DeleteMessage");
+        cardPanel.add(readAll, "ReadAll");
+        cardPanel.add(addStore, "AddStore");
+        cardPanel.add(editStore, "EditStore");
+        cardPanel.add(deleteStore, "DeleteStore");
+        cardPanel.add(manageStores, "ManageStores");
         frame.add(cardPanel);
         cardLayout.show(cardPanel, "InitMenu");
         frame.setVisible(true);
 
-    }
-
-    private JPanel createNewBuyerView() {
-        JPanel createBuyerView = new JPanel();
-        createBuyerView.setLayout(new GridLayout(8, 1));
-
-        JButton createReadAll = new JButton("Read All Messages");
-        createReadAll.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "ReadAll");
-            }
-        });
-        createBuyerView.add(createReadAll);
-        JButton createSendMessage = new JButton("Send Message");
-        createSendMessage.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "SendMessage");
-            }
-        });
-        createBuyerView.add(createSendMessage);
-        JButton createManageAccount = new JButton("Manage Account");
-        createManageAccount.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "ManageAccount");
-            }
-        });
-        createBuyerView.add(createManageAccount);
-        JButton createBrowseStores = new JButton("Browse Stores");
-        createBrowseStores.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                //TODO: implement store browsing
-            }
-        });
-        createBuyerView.add(createBrowseStores);
-        JButton createBlockUser = new JButton("Block User");
-        createBlockUser.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "BlockUser");
-            }
-        });
-        createBuyerView.add(createBlockUser);
-        JButton createBecomeInvisible = new JButton("Become Invisible");
-        createBecomeInvisible.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "InvisibleUser");
-            }
-        });
-        createBuyerView.add(createBecomeInvisible);
-        JButton createManageMessages = new JButton("Manage Messages");
-        createManageMessages.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "ManageMessages");
-            }
-        });
-        createBuyerView.add(createManageMessages);
-        JButton logOut = new JButton("Log Out");
-        logOut.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "SignInCard");
-            }
-        });
-        createBuyerView.add(logOut);
-        return createBuyerView;
     }
 
     public JPanel createInitMenu() {
@@ -196,9 +139,10 @@ public class GUI extends Main {
                 password = password.substring(password.indexOf(":") + 2, password.length());
                     if (user != null) {
                         if (user.getPassword().equals(password)) {
-                            if (user.isType().equals(userType.SELLER)) {
+                            frame.setTitle(username);
+                            if (user.isType() == userType.SELLER) {
                                 cardLayout.show(cardPanel, "SellerView");
-                            } else {
+                            } else if (user.isType() == userType.CUSTOMER) {
                                 cardLayout.show(cardPanel, "BuyerView");
                             }
                         } else {
@@ -271,7 +215,8 @@ public class GUI extends Main {
                 if(db.getUser(newUsername) != null) {
                     JOptionPane.showMessageDialog(null, "Username already exists", null, JOptionPane.INFORMATION_MESSAGE);
                 } else {
-                    if (type.equalsIgnoreCase("seller")) {
+                    frame.setTitle(newUsername);
+                    if (createAccountQuestionField.getText().equalsIgnoreCase("seller")) {
                         user = User.createUser(userType.SELLER, newUsername, newPassword, email);
                         cardLayout.show(cardPanel, "SellerView");
                     } else if (createAccountQuestionField.getText().equalsIgnoreCase("buyer")) {
@@ -309,6 +254,14 @@ public class GUI extends Main {
             }
         });
         createSellerView.add(createSendMessage);
+        JButton createManageMessages = new JButton("Manage Messages");
+        createManageMessages.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "SendMessage");
+            }
+        });
+        createSellerView.add(createManageMessages);
         JButton createManageAccount = new JButton("Manage Account");
         createManageAccount.addActionListener(new ActionListener() {
             @Override
@@ -341,14 +294,6 @@ public class GUI extends Main {
             }
         });
         createSellerView.add(createBecomeInvisible);
-        JButton createManageMessages = new JButton("Manage Messages");
-        createManageMessages.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "ManageMessages");
-            }
-        });
-        createSellerView.add(createManageMessages);
         JButton logOut = new JButton("Log Out");
         logOut.addActionListener(new ActionListener() {
             @Override
@@ -474,11 +419,11 @@ public class GUI extends Main {
         return editMessagePanel;
     }
 
-    private JPanel createSendMessage() {
+    public JPanel createSendMessage() {
         JPanel createMessageCard = new JPanel();
         createMessageCard.setLayout(new GridLayout(3, 2));
         createMessageCard.add(new JLabel("Enter Message Recipient"));
-        JTextField createMessageRecipient = new JTextField();
+        createMessageRecipient = new JTextField();
         createMessageCard.add(createMessageRecipient);
         createMessageCard.add(new JLabel("Enter Message"));
         JTextField createMessageInfo = new JTextField();
@@ -502,6 +447,7 @@ public class GUI extends Main {
                 String recipient = createMessageRecipient.getText();
                 String content = createMessageInfo.getText();
                 Main.sendMessage(recipient, user, content);
+
             }
         });
         createMessageCard.add(sendMessageButton);
@@ -569,6 +515,18 @@ public class GUI extends Main {
         noButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (user.isType() == userType.SELLER) {
+                    cardLayout.show(cardPanel, "SellerView");
+                } else if (user.isType() == userType.CUSTOMER) {
+                    cardLayout.show(cardPanel, "BuyerView");
+                }
+            }
+        });
+        deleteAccount.add(noButton);
+        JButton backButton = new JButton("Back");
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
                 cardLayout.show(cardPanel, "ManageAccount");
             }
         });
@@ -590,6 +548,8 @@ public class GUI extends Main {
                 String username = createNewUsernameField.getText();
                 if(db.editUsername(user, username) == true) {
                     JOptionPane.showMessageDialog(null, "Username has been changed succesfully", null, JOptionPane.INFORMATION_MESSAGE);
+                } else if(username == null) {
+                    JOptionPane.showMessageDialog(null, "Invalid Username", null, JOptionPane.INFORMATION_MESSAGE);
                 } else {
                     JOptionPane.showMessageDialog(null, "Username already exists", null, JOptionPane.INFORMATION_MESSAGE);
                 }
@@ -643,7 +603,7 @@ public class GUI extends Main {
 
     private JPanel newBlockUser() {
         JPanel blockUsers = new JPanel();
-        blockUsers.setLayout(new GridLayout(2, 2));
+        blockUsers.setLayout(new GridLayout(3, 2));
         blockUsers.add(new JLabel("Enter the username you would like to block"));
         JTextField createNewBlockUser = new JTextField();
         blockUsers.add(createNewBlockUser);
@@ -653,10 +613,28 @@ public class GUI extends Main {
             public void actionPerformed(ActionEvent e) {
                 String newuser = createNewBlockUser.getText();
                 user.blockUser(db.getUser(newuser));
+                db.saveUser(user);
                 JOptionPane.showMessageDialog(null, createNewBlockUser.getText() + " Has Been Successfully Blocked", "Greetings", JOptionPane.INFORMATION_MESSAGE);
             }
         });
         blockUsers.add(blockButton);
+        JButton unblockButton = new JButton("Unblock Person");
+        unblockButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String newUser = createNewBlockUser.getText();
+                User newUser2 = db.getUser(newUser);
+                List<String> blockedUsers1 = newUser2.getBlockedUsers();
+                if (blockedUsers1.contains(user.getUsername())) {
+                    JOptionPane.showMessageDialog(null, " You cannot unblock " + newUser, "Greetings", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    user.unblockUser(db.getUser(newUser));
+                    db.saveUser(user);
+                    JOptionPane.showMessageDialog(null, createNewBlockUser.getText() + " Has Been Successfully Unblocked", "Greetings", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
+        blockUsers.add(unblockButton);
         JButton backButton = new JButton("Back");
         backButton.addActionListener(new ActionListener() {
             @Override
@@ -675,7 +653,7 @@ public class GUI extends Main {
 
     private JPanel newInvisibleUser() {
         JPanel invisibleUser = new JPanel();
-        invisibleUser.setLayout(new GridLayout(2, 2));
+        invisibleUser.setLayout(new GridLayout(3,2));
         invisibleUser.add(new JLabel("Enter the username you would like to be invisble to"));
         JTextField createNewInvisibleUser = new JTextField();
         invisibleUser.add(createNewInvisibleUser);
@@ -685,10 +663,22 @@ public class GUI extends Main {
             public void actionPerformed(ActionEvent e) {
                 String newuser = createNewInvisibleUser.getText();
                 user.becomeInvisible(db.getUser(newuser));
-                JOptionPane.showMessageDialog(null, "You have become invisible", "Greetings", JOptionPane.INFORMATION_MESSAGE);
+                db.saveUser(user);
+                JOptionPane.showMessageDialog(null, "You have become invisible", null, JOptionPane.INFORMATION_MESSAGE);
             }
         });
         invisibleUser.add(invisibleButton);
+        JButton visibleButton = new JButton("Become Visible");
+        visibleButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String newuser = createNewInvisibleUser.getText();
+                user.becomeUninvisible(db.getUser(newuser));
+                db.saveUser(user);
+                JOptionPane.showMessageDialog(null, "You have become visible", null , JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+        invisibleUser.add(visibleButton);
         JButton backButton = new JButton("Back");
         backButton.addActionListener(new ActionListener() {
             @Override
@@ -723,7 +713,11 @@ public class GUI extends Main {
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "SellerView");
+                if (user.isType() == userType.SELLER) {
+                    cardLayout.show(cardPanel, "SellerView");
+                } else if (user.isType() == userType.CUSTOMER) {
+                    cardLayout.show(cardPanel, "BuyerView");
+                }
             }
         });
         getAll.add(backButton);
@@ -731,20 +725,274 @@ public class GUI extends Main {
         return getAll;
     }
 
-    private JPanel newManageStores() {
+    public JPanel newManageStores() {
         JPanel manageStores = new JPanel();
-        manageStores.setLayout(new GridLayout(2, 2));
-        manageStores.add(new JLabel("Which User's messages would you like to read?"));
-
+        manageStores.setLayout(new GridLayout(4, 1));
+        JButton addButton = new JButton("Add Store");
+        addButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "AddStore");
+            }
+        });
+        manageStores.add(addButton);
+        JButton editButton = new JButton("Edit Store");
+        editButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "EditStore");
+            }
+        });
+        manageStores.add(editButton);
+        JButton deleteButton = new JButton("Delete Store");
+        deleteButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e){
+                    cardLayout.show(cardPanel, "DeleteStore");
+                }
+        });
+        manageStores.add(deleteButton);
         JButton backButton = new JButton("Back");
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "SellerView");
+                if (user.isType() == userType.SELLER) {
+                    cardLayout.show(cardPanel, "SellerView");
+                } else if (user.isType() == userType.CUSTOMER) {
+                    cardLayout.show(cardPanel, "BuyerView");
+                }
             }
         });
         manageStores.add(backButton);
 
         return manageStores;
+    }
+    private JPanel createNewReadAll() {
+        JPanel realAll = new JPanel();
+        realAll.setLayout(new GridLayout(4, 2));
+        realAll.add(new JLabel("Enter the username for the messages you would like to view"));
+        JTextField newUsernameField = new JTextField();
+        realAll.add(newUsernameField);
+        JButton searchButton = new JButton("Search");
+        searchButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                User user1 = db.getUser(newUsernameField.getText());
+                ArrayList<Message> messages = db.findAllMessages(user, user1);
+                if(messages == null) {
+                    JOptionPane.showMessageDialog(null, "You have no messages from " + user1.getUsername(), null, JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(null, messages.toString(), null, JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
+        realAll.add(searchButton);
+        JButton searchAllButton = new JButton("Search for all users who have messaged you");
+        searchAllButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ArrayList<String> correspondents = db.getAllNames(user);
+                if (correspondents.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "No one has messaged you.", null, JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(null, "These people have messaged you: " + correspondents, null, JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
+        realAll.add(searchAllButton);
+        JButton backButton = new JButton("Back");
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (user.isType() == userType.SELLER) {
+                    cardLayout.show(cardPanel, "SellerView");
+                } else if (user.isType() == userType.CUSTOMER) {
+                    cardLayout.show(cardPanel, "BuyerView");
+                }
+            }
+        });
+        realAll.add(backButton);
+
+        return realAll;
+    }
+    public JPanel createAddStore() {
+        JPanel createStore = new JPanel();
+        createStore.setLayout(new GridLayout(2, 2));
+        createStore.add(new JLabel("Enter New Store"));
+        JTextField createNewStoreField = new JTextField();
+        createStore.add(createNewStoreField);
+        JButton storeButton = new JButton("Create New Store");
+        storeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String store1 = createNewStoreField.getText();
+                if (store1.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Store name cannot be empty", null, JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
+                store = Store.createStore(store1, user);
+                output.debugPrint(store.toString());
+                if(db.saveStore(store) != null) {
+                    JOptionPane.showMessageDialog(null, "Store added successfully", null, JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Could not add store", null, JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
+        createStore.add(storeButton);
+        JButton backButton = new JButton("Back");
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "ManageStores");
+            }
+        });
+        createStore.add(backButton);
+        return createStore;
+    }
+    public JPanel createEditStore() {
+        JPanel createNewStore = new JPanel();
+        createNewStore.setLayout(new GridLayout(3, 2));
+        createNewStore.add(new JLabel("Enter the name of the store you would like to change:"));
+        JTextField createOldStoreField = new JTextField();
+        createNewStore.add(createOldStoreField);
+        createNewStore.add(new JLabel("Enter the new name for the store:"));
+        JTextField createNewStoreField = new JTextField();
+        createNewStore.add(createNewStoreField);
+        JButton storeButton = new JButton("Change Store Name");
+        storeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String store3 = createOldStoreField.getText();
+                String store2 = createNewStoreField.getText();
+                if (db.getStore(store3) == null) {
+                    JOptionPane.showMessageDialog(null, "There is no store named " + store3, null, JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    if (db.editStore(store2, store3) == true) {
+                        JOptionPane.showMessageDialog(null, "Store successfully changed.", null, JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Store cannot be changed.", null, JOptionPane.INFORMATION_MESSAGE);
+                    }
+                }
+            }
+        });
+        createNewStore.add(storeButton);
+        JButton backButton = new JButton("Back");
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "ManageStores");
+            }
+        });
+        createNewStore.add(backButton);
+        return createNewStore;
+    }
+    public JPanel createDeleteStore() {
+        JPanel deleteStore = new JPanel();
+        deleteStore.setLayout(new GridLayout(2, 2));
+        deleteStore.add(new JLabel("Enter the name of the store you would like to delete:"));
+        JTextField createNewStoreField = new JTextField();
+        deleteStore.add(createNewStoreField);
+        JButton deletebutton = new JButton("Delete Store");
+        deletebutton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String store2 = createNewStoreField.getText();
+                if(db.removeStore(store2) == true) {
+                    JOptionPane.showMessageDialog(null, "Store successfully deleted.", null, JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Store could not be deleted, try again.", null, JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
+        deleteStore.add(deletebutton);
+        JButton backButton = new JButton("Back");
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "ManageStores");
+            }
+        });
+        deleteStore.add(backButton);
+        return deleteStore;
+    }
+    public JPanel createNewBuyerView() {
+        JPanel createBuyerView = new JPanel();
+        createBuyerView.setLayout(new GridLayout(8, 1));
+
+        JButton createReadAll = new JButton("Read Messages");
+        createReadAll.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "ReadAll");
+            }
+        });
+        createBuyerView.add(createReadAll);
+        JButton createSendMessage = new JButton("Send Message");
+        createSendMessage.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "SendMessage");
+            }
+        });
+        createBuyerView.add(createSendMessage);
+        JButton createManageMessages = new JButton("Manage Messages");
+        createManageMessages.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "SendMessage");
+            }
+        });
+        createBuyerView.add(createManageMessages);
+        JButton createManageAccount = new JButton("Manage Account");
+        createManageAccount.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "ManageAccount");
+            }
+        });
+        createBuyerView.add(createManageAccount);
+        JButton createBrowseStores = new JButton("Browse Stores");
+        createBrowseStores.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ArrayList<String> stores = db.getAllStoreNames();
+                Object[] stores2 = stores.toArray();
+                JPanel panel = new JPanel();
+                int browse = JOptionPane.showOptionDialog(null, "Which store would you like to message?", "Store",
+                        0, stores.size(), null, stores2, stores2[0]);
+                String storeName = stores.get(browse);
+                Store storeFromArray = db.getStore(storeName);
+                User owner = storeFromArray.getOwner();
+                cardLayout.show(cardPanel, "SendMessage");
+                createMessageRecipient.setText(owner.getUsername());
+            }
+        });
+        createBuyerView.add(createBrowseStores);
+        JButton createBlockUser = new JButton("Block User");
+        createBlockUser.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "BlockUser");
+            }
+        });
+        createBuyerView.add(createBlockUser);
+        JButton createBecomeInvisible = new JButton("Become Invisible");
+        createBecomeInvisible.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "InvisibleUser");
+            }
+        });
+        createBuyerView.add(createBecomeInvisible);
+        JButton logOut = new JButton("Log Out");
+        logOut.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "SignInCard");
+            }
+        });
+        createBuyerView.add(logOut);
+        return createBuyerView;
     }
 }

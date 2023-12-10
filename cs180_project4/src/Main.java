@@ -74,7 +74,7 @@ public class Main {
             int input = s.nextInt();
             switch (input) {
                 // TODO: implement menus for initial menu
-                case 1 -> readMessages(s, user);
+                case 1 -> System.out.println(input);
                 case 2 -> System.out.println(input);
                 case 3 -> manageAccount(s, user);
                 case 4 -> System.out.println(input);
@@ -95,7 +95,7 @@ public class Main {
             int input = s.nextInt();
             switch (input) {
                 // TODO: implement menus for initial menu
-                case 1 -> readMessages(s, user);
+                case 1 -> System.out.println(input);
                 case 2 -> System.out.println(input);
                 case 3 -> System.out.println(input);
                 case 4 -> System.out.println(input);
@@ -112,26 +112,36 @@ public class Main {
     public static void sendMessage(String username, User sender, String content) {
         while (true) {
             User recepient = db.getUser(username);
-            List<User> invisibleUsers1 = recepient.getInvisibleUsers();
-            List<User> blockedUsers1 = sender.getBlockedUsers();
-            if (invisibleUsers1.contains(sender)) {
-                JOptionPane.showMessageDialog(null, "Error no username called " + sender.getUsername() + " exists. Try Again", null, JOptionPane.INFORMATION_MESSAGE);
+            List<String> invisibleUsers1 = recepient.getInvisibleUsers();
+            List<String> blockedUsers1 = sender.getBlockedUsers();
+            List<String> blockedUsers2 = recepient.getBlockedUsers();
+            if (invisibleUsers1.contains(sender.getUsername())) {
+                JOptionPane.showMessageDialog(null, "Error no username called " + username + " exists. Try Again", null, JOptionPane.INFORMATION_MESSAGE);
+                break;
             }
-                Message message = new Message(sender, recepient, content);
-                if (message == null || recepient == null) {
-                    JOptionPane.showMessageDialog(null, "Error, invalid message, please try again", null, JOptionPane.INFORMATION_MESSAGE);
+            Message message = new Message(sender, recepient, content);
+            if (message == null || recepient == null) {
+                JOptionPane.showMessageDialog(null, "Error, invalid message, please try again", null, JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                if (blockedUsers1.contains(username)) {
+                    JOptionPane.showMessageDialog(null, "You have blocked that user. Message not sent.", null, JOptionPane.INFORMATION_MESSAGE);
+                    break;
+                } else if (blockedUsers2.contains(sender.getUsername())){
+                    JOptionPane.showMessageDialog(null, sender.getUsername() + " is blocked by " + recepient.getUsername() + ". Message not sent.", null, JOptionPane.INFORMATION_MESSAGE);
+                    break;
                 } else {
-                    if (!blockedUsers1.contains(recepient)) {
-                        db.saveMessage(message);
-                        System.out.println("Message sent successfully");
+                    if (sender.isType() == recepient.isType()) {
+                        JOptionPane.showMessageDialog(null, "You cannot message that user", null, JOptionPane.INFORMATION_MESSAGE);
                         break;
                     } else {
-                        JOptionPane.showMessageDialog(null, sender.getUsername() + " is blocked by " + recepient.getUsername() + ". Message not sent.", null, JOptionPane.INFORMATION_MESSAGE);
+                        db.saveMessage(message);
+                        JOptionPane.showMessageDialog(null, "Message Sent Successfully", null, JOptionPane.INFORMATION_MESSAGE);
                         break;
                     }
                 }
             }
         }
+    }
 
 
     public static void readMessages(Scanner s, User receiver) {
@@ -273,6 +283,7 @@ public class Main {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
+
                 new GUI();
             }
         });

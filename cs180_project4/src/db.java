@@ -6,6 +6,8 @@ import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import javax.swing.*;
+import java.awt.*;
 
 public class db {
     private static String root = "storage";
@@ -54,7 +56,7 @@ public class db {
         String usersDirectoryPath = root + "/users";
         String messagesDirectoryPath = root + "/messages";
         String storesDirectoryPath = root + "/stores";
-        
+
         if (createDirectory(usersDirectoryPath) && createDirectory(messagesDirectoryPath)  && createDirectory(storesDirectoryPath)) {
             output.debugPrint("User and messages directories created.");
             return true;
@@ -106,7 +108,6 @@ public class db {
     public static boolean deleteUser(User user) {
         String username = user.getUsername();
         String filePath = "storage/users/" + username + ".user";
-
         File file = new File(filePath);
         file.delete();
         output.debugPrint("User deleted");
@@ -115,7 +116,6 @@ public class db {
 
     public static boolean editUsername(User user, String newUsername) {
         String oldUsername = user.getUsername();
-
         if (getUser(newUsername) != null) {
             output.debugPrint("User with username {" + newUsername + "} already exists.");
             return false;
@@ -129,17 +129,12 @@ public class db {
                 if (oldFile.renameTo(newFile)) {
                     output.debugPrint("Username updated. User file moved from " + oldFilePath + " to " + newFilePath);
                 } else {
-                    output.debugPrint("Failed to update username. Could not move user file.");
+                    output.debugPrint("Failed to update username.");
                     return false;
                 }
-            } else {
-                output.debugPrint("User file not found at " + oldFilePath);
-                return false;
             }
-
             return true;
         }
-    }
 
     public static boolean editPassword(User user, String newPassword) {
         user.setPassword(newPassword);
@@ -280,19 +275,15 @@ public class db {
         String sentName = fileName + "/sent";
         try {
             File f = new File(fileName);
-            if (f.exists()) {
-                File[] files = f.listFiles();
-                for (File thing : files) {
-                    if (thing != null) {
-                    File[] deepestLayer = thing.listFiles();
-                    for (File deepestFile : deepestLayer) {
-                        String absPath = deepestFile.getAbsolutePath();
-                        int index = absPath.lastIndexOf("/");
-                        String otherUser = absPath.substring(index);
-                        if (correspondents.indexOf(getUser(otherUser)) == -1) {
-                            correspondents.add(getUser(otherUser));
-                            }
-                        }
+            File[] files = f.listFiles();
+            for (File thing : files) {
+                File[] deepestLayer = thing.listFiles();
+                for (File deepestFile : deepestLayer) {
+                    String absPath = deepestFile.getAbsolutePath();
+                    int index = absPath.lastIndexOf("/");
+                    String otherUser = absPath.substring(index);
+                    if (correspondents.indexOf(getUser(otherUser)) == -1) {
+                        correspondents.add(getUser(otherUser));
                     }
                 }
             }
@@ -303,55 +294,92 @@ public class db {
         }
         return correspondents;
     }
+    public static ArrayList<String> getAllStoreNames() {
+        ArrayList<String> storeNames = new ArrayList<String>();
+        String fileName = root + "/stores/";
+        try {
+            File f = new File(fileName);
+            File[] files = f.listFiles();
+            if(files != null) {
+                for (File thing : files) {
+                    File[] deepestLayer = thing.listFiles();
+                    for (File deepestFile : files) {
+                        String absPath = deepestFile.getName();
+                        Store store2 = getStore(absPath);
+                        if (store2 != null && storeNames.indexOf(absPath) == -1) {
+                            storeNames.add(store2.getName());
+                        }
+                    }
+                }
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return storeNames;
+    }
+        public static ArrayList<String> getAllNames(User u) {
+            ArrayList<String> correspondents = new ArrayList<String>();
+            String fileName = root + "/messages/" + u.getUsername() + "/received";
+            try {
+                File f = new File(fileName);
+                File[] files = f.listFiles();
+                if(files != null) {
+                    for (File thing : files) {
+                        File[] deepestLayer = thing.listFiles();
+                        for (File deepestFile : files) {
+                            String absPath = deepestFile.getName();
+                            User user2 = getUser(absPath);
+                            if (user2 != null && correspondents.indexOf(absPath) == -1) {
+                                correspondents.add(user2.getUsername());
+                            }
+                        }
+                    }
+                }
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return correspondents;
+        }
 
-    
-    public static ArrayList<Message> findAllMessages(User user1, User user2) { // returns all messages between user1 and user2 in order
-        ArrayList<Message> messageLog = new ArrayList<Message>();
+    public static ArrayList<Message> findAllMessages(User user1, User user2) {
+        ArrayList<Message> messageLog = new ArrayList<>();
         String username1 = user1.getUsername();
         String username2 = user2.getUsername();
-        String filePath1 = "storage/messages" + username1 + "/sent/" + username2;
-        String filePath2 = "storage/messages" + username2 + "/sent/" + username1;
+        String filePath1 = "storage/messages/" + username1 + "/sent/" + username2;
+        String filePath2 = "storage/messages/" + username2 + "/sent/" + username1;
+
         try {
             File f1 = new File(filePath1);
             File[] f1Array = f1.listFiles();
-            Message[] f1MessageArray = new Message[f1Array.length];
+            Message[] f1MessageArray = new Message[f1Array != null ? f1Array.length : 0];
+
             File f2 = new File(filePath2);
             File[] f2Array = f2.listFiles();
-            Message[] f2MessageArray = new Message[f2Array.length];
-            for (int i = 0; i < f1Array.length; i++) {
-                Message m1 = readMessageFromFile(f1Array[i].getPath());
-                Message m2 = readMessageFromFile(f2Array[i].getPath());
-                f1MessageArray[i] = m1;
-                f2MessageArray[i] = m2;
+            Message[] f2MessageArray = new Message[f2Array != null ? f2Array.length : 0];
+
+            for (int i = 0; i < f1MessageArray.length && i < f2MessageArray.length; i++) {
+                f1MessageArray[i] = readMessageFromFile(f1Array[i].getPath());
+                f2MessageArray[i] = readMessageFromFile(f2Array[i].getPath());
             }
-            messageLog.add(f1MessageArray[0]);
-            boolean added = false;
-            for (int i = 1; i < f1MessageArray.length; i++) { //sorting
-                Date ts = f1MessageArray[i].getTimestamp();
-                for (int j = 0; j < messageLog.size(); j++) {
-                    Date ts2 = messageLog.get(j).getTimestamp();
-                    if (ts.compareTo(ts2) > 0) {
-                        messageLog.add(j, f1MessageArray[i]);
-                        added = true;
-                    }
-                    if (!added) {
-                        messageLog.add(f1MessageArray[i]);
-                    }
-                    added = false;
-                }
-            }
-            for (int i = 1; i < f2MessageArray.length; i++) { //sorting
-                Date ts = f2MessageArray[i].getTimestamp();
-                for (int j = 0; j < messageLog.size(); j++) {
-                    Date ts2 = messageLog.get(j).getTimestamp();
-                    if (ts.compareTo(ts2) > 0) {// compareto > 0 when ts is before ts2
-                        messageLog.add(j, f2MessageArray[i]); // add it before whatever its before first
-                        added = true;
-                    }
-                    if (!added) {
-                        messageLog.add(f2MessageArray[i]); //if not inserted already, put at end
-                    }
-                    added = false;
+
+            // Sorting both arrays based on timestamps
+            Comparator<Message> timestampComparator = Comparator.comparing(Message::getTimestamp, Comparator.nullsLast(Comparator.naturalOrder()));
+            Arrays.sort(f1MessageArray, timestampComparator);
+            Arrays.sort(f2MessageArray, timestampComparator);
+
+            // Merge sorted arrays into messageLog
+            int i = 0, j = 0;
+            while (i < f1MessageArray.length || j < f2MessageArray.length) {
+                if (i < f1MessageArray.length && (j == f2MessageArray.length || timestampComparator.compare(f1MessageArray[i], f2MessageArray[j]) <= 0)) {
+                    messageLog.add(f1MessageArray[i]);
+                    i++;
+                } else {
+                    messageLog.add(f2MessageArray[j]);
+                    j++;
                 }
             }
         } catch (NullPointerException e) {
@@ -361,7 +389,8 @@ public class db {
         }
         return messageLog;
     }
-    
+
+
     //HELPER METHODS
     private static String getMessageFilePath(User user, Message message) {
         String senderUsername = message.getSender().getUsername();
@@ -388,25 +417,32 @@ public class db {
         return !messageFile.exists();
     }
     public static Store saveStore(Store store) {
-        if (db.readStoreFromFile(store.getName()) != null) {
-            output.debugPrint("Stores cannot have the same name");
-            return null;
-        }
-        String dirPath = "storage/stores/" + store.getName() + "/";
-        String filePath = dirPath + store.getName() + ".storeInfo";
-        createDirectory(dirPath);
-
-        try (FileOutputStream fileOutputStream = new FileOutputStream(filePath); 
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream)) {
+        String filePath = "storage/stores/" + store.getName() + "/";
+        try (FileOutputStream fileOutputStream = new FileOutputStream(filePath); ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream)) {
 
             objectOutputStream.writeObject(store);
-            output.debugPrint("Store serialized and saved to " + store.getName() + ".storeInfo");
+            output.debugPrint("Store serialized and saved to " + filePath);
         } catch (IOException e) {
-            output.debugPrint("Failed to save user to " + dirPath);
+            output.debugPrint("Failed to save store to " + filePath);
             output.debugPrint(Arrays.toString(e.getStackTrace()));
             return null;
         }
         return store;
+    }
+    public static Store getStore(String storeName) {
+        String filePath = "storage/stores/" + storeName;
+        try (FileInputStream fileInputStream = new FileInputStream(filePath); ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
+            Store store = (Store) objectInputStream.readObject();
+            output.debugPrint("Store deserialized from " + filePath);
+            return store;
+        } catch (FileNotFoundException e){
+            output.debugPrint("Store file not found at " + filePath);
+        } catch (IOException | ClassNotFoundException e) {
+            output.debugPrint("Failed to get store from " + filePath);
+            output.debugPrint(Arrays.toString(e.getStackTrace()));
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static Item saveItem(Store store, Item item) {
@@ -450,11 +486,28 @@ public class db {
         deleteDir(f);
         return true;
     }
-    
+    public static boolean editStore(String newName, String oldName) {
+        Store store1 = getStore(oldName);
+        if (getStore(newName) != null) {
+            output.debugPrint("Store with username {" + newName + "} already exists.");
+            return false;
+        } else {
+            store1.setName(newName);
+            if (store1.getName() == newName) {
+                saveStore(store1);
+                removeStore(oldName);
+                output.debugPrint("Store updated." );
+            } else {
+                output.debugPrint("Failed to update store name.");
+                return false;
+            }
+        }
+        return true;
+    }
     public static boolean removeItem(Store store, Item item) {
         String itemName = item.getName();
         String storeName = store.getName();
-        
+
         String storeDirPath = root + "/stores/" + storeName;
         String itemFilePath = storeDirPath + "/" + itemName + ".item";
 
@@ -464,15 +517,14 @@ public class db {
     }
 
     public static Item readItemFromFile(Store store, String itemName) {
-        
+
         String storeName = store.getName();
-        
         String storeDirPath = root + "/stores/" + storeName;
         String itemFilePath = storeDirPath + "/" + itemName + ".item";
-        
+
         try (FileInputStream fileInputStream = new FileInputStream(itemFilePath);
              ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
-            
+
             Item newItem = (Item) objectInputStream.readObject();
             output.debugPrint("Message deserialized from " + itemFilePath);
             return newItem;
@@ -484,13 +536,13 @@ public class db {
     }
 
     public static Store readStoreFromFile(String storeName){
-        
+
         String storeDirPath = root + "/stores/" + storeName;
-        String itemFilePath = storeDirPath + "/" + storeName + ".storeInfo";
-        
+        String itemFilePath = storeDirPath + "/" + storeName;
+
         try (FileInputStream fileInputStream = new FileInputStream(itemFilePath);
              ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
-            
+
             Store newStore = (Store) objectInputStream.readObject();
             output.debugPrint("Message deserialized from " + itemFilePath);
             return newStore;
@@ -512,7 +564,7 @@ public class db {
         output.debugPrint("Bought item successfully");
         return true;
     }
-    
+
     public static boolean restockItem(Store store, String itemName, int quantity) {
         Item item = readItemFromFile(store, itemName);
         if (quantity <= 0) {
@@ -524,11 +576,11 @@ public class db {
         output.debugPrint("Restocked item successfully");
         return true;
     }
-    
-     //HELPER METHODS
-    
 
-  
+     //HELPER METHODS
+
+
+
     public static ArrayList<Message> getConversation(User viewer, User otherParticipant) {
         ArrayList<Message> conversation = new ArrayList<>();
 
