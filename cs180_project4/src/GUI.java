@@ -7,11 +7,13 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 public class GUI extends Main {
@@ -37,6 +39,9 @@ public class GUI extends Main {
         JPanel invisibleUser = newInvisibleUser();
         JPanel getAll = newGetAll();
         JPanel readAll = readAllMessages();
+        JPanel manageMessages = createManageMessages();
+        JPanel editMessage = createEditMessagePanel();
+        JPanel deleteMessage = createDeleteMessage();
         JPanel manageStores = newManageStores();
         JPanel createInitMenu = createInitMenu();
         JPanel signInCard = createSignInCard();
@@ -58,7 +63,9 @@ public class GUI extends Main {
         cardPanel.add(signInCard, "SignInCard");
         cardPanel.add(createAccountCard, "CreateAccountCard");
         cardPanel.add(buyerView, "BuyerView");
-
+        cardPanel.add(editMessage, "EditMessage");
+        cardPanel.add(manageMessages, "ManageMessages");
+        cardPanel.add(deleteMessage, "DeleteMessage");
         frame.add(cardPanel);
         cardLayout.show(cardPanel, "InitMenu");
         frame.setVisible(true);
@@ -121,7 +128,7 @@ public class GUI extends Main {
         createManageMessages.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //TODO: implement editing/deleting messages.
+                cardLayout.show(cardPanel, "ManageMessages");
             }
         });
         createBuyerView.add(createManageMessages);
@@ -338,7 +345,7 @@ public class GUI extends Main {
         createManageMessages.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //TODO: implement editing/deleting messages.
+                cardLayout.show(cardPanel, "ManageMessages");
             }
         });
         createSellerView.add(createManageMessages);
@@ -403,11 +410,68 @@ public class GUI extends Main {
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "SellerView");
+                if (user.isType().equals(userType.SELLER)) {
+                    cardLayout.show(cardPanel, "SellerView");
+                } else {
+                    cardLayout.show(cardPanel, "BuyerView");
+                }
             }
         });
 
         return getAll;
+    }
+
+     private JPanel createManageMessages() {
+        JPanel manageMessages = new JPanel();
+        manageMessages.setLayout(new GridLayout(3, 2));
+
+        JButton editMessageButton = new JButton("Edit Message");
+        editMessageButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "EditMessage");
+            }
+        });
+        manageMessages.add(editMessageButton);
+
+        JButton deleteMessageButton = new JButton("Delete Message");
+        deleteMessageButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "DeleteMessage");
+            }
+        });
+        manageMessages.add(deleteMessageButton);
+
+        JButton backButton = new JButton("Back");
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (user.isType().equals(userType.SELLER)) {
+                    cardLayout.show(cardPanel, "SellerView");
+                } else {
+                    cardLayout.show(cardPanel, "BuyerView");
+                }
+            }
+        });
+        manageMessages.add(backButton);
+
+        return manageMessages;
+    }
+    
+    private JPanel createDeleteMessage() {
+        JPanel deleteMessage = new JPanel();
+
+        
+
+        return deleteMessage;
+    }
+
+    private JPanel createEditMessagePanel() {
+
+        JPanel editMessagePanel = new JPanel();
+        
+        return editMessagePanel;
     }
 
     private JPanel createSendMessage() {
