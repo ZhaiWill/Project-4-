@@ -256,7 +256,7 @@ public class GUI extends Main {
         createManageMessages.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "SendMessage");
+                cardLayout.show(cardPanel, "ManageMessages");
             }
         });
         createSellerView.add(createManageMessages);
@@ -903,7 +903,7 @@ public class GUI extends Main {
         createManageMessages.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "SendMessage");
+                cardLayout.show(cardPanel, "ManageMessages");
             }
         });
         createBuyerView.add(createManageMessages);
