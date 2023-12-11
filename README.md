@@ -27,3 +27,7 @@ Main: This displays the UI so that users can easily create or log in to accounts
 Test.java: This is simply a class with a main method that is used to test methods to verify that they work properly. Test cases that we used are here. 
 
 Output.java: This is a class that is used to print debugging statements to verify that each method is functioning as intended. The boolean "debugMode" should be set to false so that the text used for debugging is not printed to the console by submission time. 
+
+DBServer.java: This class is a server which only has one method, the HandleClient method. Using it, you can make a db clear or initialize its database, as well as interact with users by saving a user, getting a user, deleting a user, or getting all users. The class can also edit or delete both users and messages, and pull all conversations. Lastly, it can get all stores, remove stores and save stores. 
+
+UI.java: The UI is what the user will see and interact with. It communicates with the user through JOptionPanes and will ask the user to input and commit actions. It will ask either for Strings or Integers and contains a user menu, welcome screen, a menu for creating a new users, and can show messages. 
