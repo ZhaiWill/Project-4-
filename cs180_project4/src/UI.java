@@ -400,9 +400,9 @@ public class UI {
 
     private boolean isValidString(String input) {
         if(input == null) return false;
-        // Check if the input contains only letters, periods, and /
+        // Check if the input contains only letters, periods, and / or " "
         for (char c : input.toCharArray()) {
-            if (!Character.isLetter(c) && !Character.isDigit(c) && c != '.' && c != '/' && c != '@') {
+            if (!Character.isLetter(c) && !Character.isDigit(c) && c != '.' && c != '/' && c != '@' && c != ' ') {
                 return false;
             }
         }
