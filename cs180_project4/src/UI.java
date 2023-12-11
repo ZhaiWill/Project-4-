@@ -354,7 +354,13 @@ public class UI {
     }
 
     public boolean queryYesNo(String query) {
-        return JOptionPane.showInputDialog(query + " (Y/N):").toLowerCase().startsWith("y");
+        String res = JOptionPane.showInputDialog(query + " (Y/N):");
+
+        if(res == null) {
+            showMessage("You must answer with Y or N");
+            return queryYesNo(query);
+        }
+        return res.toLowerCase().startsWith("y");
     }
 
 
@@ -393,6 +399,7 @@ public class UI {
     }
 
     private boolean isValidString(String input) {
+        if(input == null) return false;
         // Check if the input contains only letters, periods, and /
         for (char c : input.toCharArray()) {
             if (!Character.isLetter(c) && !Character.isDigit(c) && c != '.' && c != '/' && c != '@') {

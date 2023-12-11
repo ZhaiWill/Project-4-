@@ -1,7 +1,7 @@
 import javax.swing.*;
 
 public class output {
-    private static boolean debugMode = true;
+    private static boolean debugMode = false;
 
     public static void print(String message) {
 //        System.out.println(message);
