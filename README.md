@@ -1,5 +1,5 @@
 # Project-5-Messaging System
-Project 4 - William, Farhan, Kyle, Elijah
+Project 5 - William, Farhan, Kyle, Elijah
 Option 2 - Messaging System
 
 1. Instructions on how to compile and run our project. 
