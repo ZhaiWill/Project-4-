@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -42,6 +43,7 @@ public class UI {
                 case 4 -> manageStoresMenu();
             }
         }
+
     }
 
     private void manageStoresMenu() {
@@ -57,13 +59,13 @@ public class UI {
         String storeName = queryValue("What would you like to name your store?", true);
         Store newStore = new Store(storeName, this.loggedInUser.username);
         if (dbClientInstance.readStoreFromFile(storeName) != null) {
-            System.out.println("Sorry, a store with that name already exists");
-            pressEnterToContinue();
+            output.print("Sorry, a store with that name already exists");
+
             return;
         }
         dbClientInstance.saveStore(newStore);
-        System.out.println("Successfully created store " + newStore.storeName);
-        pressEnterToContinue();
+        output.print("Successfully created store " + newStore.storeName);
+
     }
 
     private void viewStoresMenu() {
@@ -75,36 +77,35 @@ public class UI {
             }
         }
         if (storesOwnedByUser.size() == 0) {
-            System.out.println("You currently have no stores");
-            pressEnterToContinue();
+            output.print("You currently have no stores");
+
             return;
         }
         for (Store store : storesOwnedByUser) {
-            System.out.println(store.storeName);
+            output.print(store.storeName);
         }
-        pressEnterToContinue();
+
     }
 
     private void findStoresMenu() {
-        System.out.println("Here is a list of stores you can message:");
+        output.print("Here is a list of stores you can message:");
         ArrayList<Store> stores = this.loggedInUser.getAllAccessibleStores();
         for (int i = 0; i < stores.size(); i++) {
             Store store = stores.get(i);
-            System.out.println(i + ": " + store.storeName + " owned by " + store.OwnerUserName);
+            output.print(i + ": " + store.storeName + " owned by " + store.OwnerUserName);
         }
 
         if (queryYesNo("Would you like to message one?")) {
-            System.out.println("What store # would you like to message?");
-            int storeNumber = getIntegerValue(0, stores.size() - 1);
+            int storeNumber = getIntegerValue("What store # would you like to message?",0, stores.size() - 1);
             sendMessageFinalMenu(dbClientInstance.getUser(stores.get(storeNumber).OwnerUserName));
         }
     }
 
     private void findAlternateUsersMenu() {
-        System.out.println("Here is a list of " + (this.loggedInUser.type == userType.CUSTOMER ? "sellers" : "customers") + " you can message:");
+        output.print("Here is a list of " + (this.loggedInUser.type == userType.CUSTOMER ? "sellers" : "customers") + " you can message:");
 
         for (User user : this.loggedInUser.getAllAccessibleUsers()) {
-            System.out.println(user.username);
+            output.print(user.username);
         }
 
         if (queryYesNo("Would you like to message one?")) {
@@ -119,24 +120,24 @@ public class UI {
             recipientUser = dbClientInstance.getUser(queryValue("what user would you like to send a message to?", true));
 
             if (recipientUser == null) {
-                System.out.println("Sorry, a user with that username does not exist");
+                output.print("Sorry, a user with that username does not exist");
                 continue;
             }
             if (recipientUser == this.loggedInUser) {
-                System.out.println("You can not send a message to yourself");
+                output.print("You can not send a message to yourself");
                 continue;
             }
 
             if (recipientUser.getUserBlockedStatus(this.loggedInUser) == userBlockStatus.BLOCKED) {
-                System.out.println("Sorry, you can not send messages to that user");
+                output.print("Sorry, you can not send messages to that user");
                 continue;
             }
             if (recipientUser.getUserBlockedStatus(this.loggedInUser) == userBlockStatus.INVISIBLE) {
-                System.out.println("Sorry, a user with that username does not exist");
+                output.print("Sorry, a user with that username does not exist");
                 continue;
             }
             if (this.loggedInUser.type == recipientUser.type) {
-                System.out.println("Sorry, you can not send messages to other " + (this.loggedInUser.type == userType.CUSTOMER ? "customers" : "sellers"));
+                output.print("Sorry, you can not send messages to other " + (this.loggedInUser.type == userType.CUSTOMER ? "customers" : "sellers"));
                 continue;
             }
             sendMessageFinalMenu(recipientUser);
@@ -165,7 +166,7 @@ public class UI {
                 String fileContents = new String((Files.readAllBytes(f.toPath())));
                 res = fileContents;
             } catch (IOException ignored) {
-                System.out.println("Sorry, we can not ready any file with that path");
+                output.print("Sorry, we can not ready any file with that path");
                 continue;
             }
 
@@ -177,11 +178,11 @@ public class UI {
     public void viewConversationsMenu() {
         List<String> userConvoList = loggedInUser.getAllAccessibleConversations();
         if (userConvoList.size() == 0) {
-            System.out.println("You currently have no conversations");
-            pressEnterToContinue();
+            output.print("You currently have no conversations");
+
             return;
         }
-        System.out.println("What conversation would you like to see?");
+        output.print("What conversation would you like to see?");
         int userOption = generateMenu(userConvoList.toArray(new String[0]));
         viewConversationWith(userConvoList.get(userOption));
     }
@@ -198,10 +199,10 @@ public class UI {
             res += m.sender.username;
             res += ": ";
             res += m.contents;
-            System.out.println(res);
+            output.print(res);
         }
         while (true) {
-            pressEnterToContinue();
+
             switch (generateMenu(new String[]{"return", "edit message", "delete message"})) {
                 case 0 -> {
                     return;
@@ -218,25 +219,25 @@ public class UI {
     }
 
     private void deleteMessageMenu(ArrayList<Message> messages) {
-        System.out.println("What message number would you like to delete?");
-        int messageNumber = getIntegerValue(0, messages.size() - 1);
+
+        int messageNumber = getIntegerValue("What message number would you like to delete?",0, messages.size() - 1);
         Message m = messages.get(messageNumber);
 
         dbClientInstance.deleteMessage(this.loggedInUser, m);
-        System.out.println("Successfully updated contents");
+        output.print("Successfully updated contents");
 
     }
 
     private void editMessageMenu(ArrayList<Message> messages) {
-        System.out.println("What message number would you like to edit?");
-        int messageNumber = getIntegerValue(0, messages.size() - 1);
+
+        int messageNumber = getIntegerValue("What message number would you like to edit?",0, messages.size() - 1);
         Message m = messages.get(messageNumber);
         if (!Objects.equals(m.sender.username, this.loggedInUser.username)) {
-            System.out.println("You can not edit a message that you did not send");
+            output.print("You can not edit a message that you did not send");
             return;
         }
         dbClientInstance.editMessage(m, getMessageContents());
-        System.out.println("Successfully updated contents");
+        output.print("Successfully updated contents");
 
     }
 
@@ -245,15 +246,15 @@ public class UI {
         while (true) {
             switch (generateMenu(new String[]{"Block a user", "Unblock a user", "See users you have blocked", "return"})) {
                 case 0 -> {
-                    System.out.println("Who would you like to block?");
+                    output.print("Who would you like to block?");
                     String username = queryValue("username", false);
                     User user = dbClientInstance.getUser(username);
                     if (user == null) {
-                        System.out.println("Sorry, a user with that username does not exist");
+                        output.print("Sorry, a user with that username does not exist");
                         continue;
                     }
                     if (Objects.equals(user.username, this.loggedInUser.username)) {
-                        System.out.println("You can not block yourself");
+                        output.print("You can not block yourself");
                         continue;
                     }
                     boolean invisibleModeBlock = queryYesNo(("Would you like to block this user in invisible mode?"));
@@ -261,29 +262,29 @@ public class UI {
                     dbClientInstance.saveUser(this.loggedInUser);
                 }
                 case 1 -> {
-                    System.out.println("Who would you like to unblock?");
+                    output.print("Who would you like to unblock?");
                     String username = queryValue("username", false);
                     User user = dbClientInstance.getUser(username);
                     if (user == null) {
-                        System.out.println("Sorry, a user with that username does not exist");
+                        output.print("Sorry, a user with that username does not exist");
                         continue;
                     }
                     if (Objects.equals(user.username, this.loggedInUser.username)) {
-                        System.out.println("You can not unblock yourself");
+                        output.print("You can not unblock yourself");
                         continue;
                     }
                     if (this.loggedInUser.getUserBlockedStatus(user) == userBlockStatus.ALLOWED) {
-                        System.out.println("That user is not blocked");
+                        output.print("That user is not blocked");
                         continue;
                     }
                     this.loggedInUser.setUserBlockStatus(user.username, userBlockStatus.ALLOWED);
                 }
                 case 2 -> {
                     Map<String, userBlockStatus> stringuserBlockStatusMap = this.loggedInUser.userBlockStatusMap;
-                    System.out.println("You have blocked the following users:");
+                    output.print("You have blocked the following users:");
                     for (Map.Entry<String, userBlockStatus> entry : stringuserBlockStatusMap.entrySet()) {
                         if (entry.getValue() == userBlockStatus.BLOCKED || entry.getValue() == userBlockStatus.INVISIBLE) {
-                            System.out.println(entry.getKey() + " is blocked" + (entry.getValue() == userBlockStatus.INVISIBLE ? " (invisible)" : ""));
+                            output.print(entry.getKey() + " is blocked" + (entry.getValue() == userBlockStatus.INVISIBLE ? " (invisible)" : ""));
                         }
                     }
                 }
@@ -291,7 +292,6 @@ public class UI {
                     return;
                 }
             }
-            pressEnterToContinue();
         }
     }
 
@@ -309,7 +309,7 @@ public class UI {
         do {
             String username = queryValue("username", false);
             if (dbClientInstance.getUser(username) != null) {
-                System.out.println("Sorry, that username is already taken");
+                output.print("Sorry, that username is already taken");
                 continue;
             }
             String password = queryValue("password", false);
@@ -327,7 +327,7 @@ public class UI {
             String password = queryValue("password", false);
             User user = dbClientInstance.getUser(username);
             if (user == null || !password.equals(user.password)) {
-                System.out.println("Sorry, your username or password is incorrect.");
+                output.print("Sorry, your username or password is incorrect.");
                 continue;
             }
             return user;
@@ -335,49 +335,42 @@ public class UI {
         } while (true);
     }
 
-
-    //HELPER METHODS
+    // HELPER METHODS
     public int generateMenu(String[] choices) {
-        System.out.println("CHOOSE AN OPTION:");
+        StringBuilder message = new StringBuilder("CHOOSE AN OPTION:\n");
         for (int i = 0; i < choices.length; i++) {
-            System.out.println(i + ": " + choices[i]);
+            message.append(i).append(": ").append(choices[i]).append("\n");
         }
-
-        return getIntegerValue(0, choices.length - 1);
+        return getIntegerValue(message.toString(), 0, choices.length - 1);
     }
 
-
     public String queryValue(String query, boolean customPhrase) {
-        if (!customPhrase) System.out.println("Please enter the following: (" + query + ")");
-        else System.out.println(query);
-        //ensure that input is alphanumeric
-
+        if (!customPhrase) {
+            showMessage("Please enter the following: (" + query + ")");
+        } else {
+            showMessage(query);
+        }
         return getStringValue();
     }
 
     public boolean queryYesNo(String query) {
-        System.out.println(query + " (Y/N):");
-        return getStringValue().toLowerCase().startsWith("y");
+        return JOptionPane.showInputDialog(query + " (Y/N):").toLowerCase().startsWith("y");
     }
 
-    public void pressEnterToContinue() {
-        System.out.println("Press Enter to continue");
-        scan.nextLine();
-    }
 
-    public int getIntegerValue(int min, int max) {
+
+    public int getIntegerValue(String message, int min, int max) {
         Integer res = null;
         while (res == null) {
             try {
-                res = Integer.valueOf(scan.nextLine());
+                res = Integer.valueOf(JOptionPane.showInputDialog(message));
             } catch (Exception ignored) {
-                System.out.println("Please enter a valid integer");
+                showMessage("Please enter a valid integer");
                 continue;
             }
             if (res < min || res > max) {
-                System.out.println("Please enter an integer between " + min + " and " + max + " inclusive");
+                showMessage("Please enter an integer between " + min + " and " + max + " inclusive");
                 res = null;
-                continue;
             }
         }
         return res;
@@ -386,13 +379,17 @@ public class UI {
     public String getStringValue() {
         String res = null;
         while (res == null) {
-            res = scan.nextLine();
+            res = JOptionPane.showInputDialog("Enter a string:");
             if (!isValidString(res)) {
-                System.out.println("Please enter a valid string with only letters, periods, /, and @");
+                showMessage("Please enter a valid string with only letters, periods, /, and @");
                 res = null;
             }
         }
         return res;
+    }
+
+    private void showMessage(String message) {
+        JOptionPane.showMessageDialog(null, message);
     }
 
     private boolean isValidString(String input) {

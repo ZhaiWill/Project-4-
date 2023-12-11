@@ -1,8 +1,11 @@
+import javax.swing.*;
+
 public class output {
     private static boolean debugMode = true;
 
     public static void print(String message) {
-        System.out.println(message);
+//        System.out.println(message);
+        JOptionPane.showMessageDialog(null, message);
     }
 
     public static void debugPrint(String message) {
