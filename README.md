@@ -10,7 +10,7 @@ Select the .java file called "Main." Run the main method to start the program.
 
 Submitted report on Brightspace - Elijah
 
-Submitted video/presentation on Brightspace - Elijah
+Submitted video/presentation on Brightspace - William
 
 Submitted Vocareum workspace. - Farhan
 
