@@ -19,7 +19,7 @@ public class DBServer {
                 clientThread.start();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
     }
 
@@ -112,7 +112,7 @@ public class DBServer {
             }
 
         } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
     }
 }

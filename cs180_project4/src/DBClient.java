@@ -241,20 +241,20 @@ public class DBClient {
 
         // Example: Clear Database
         boolean clearResult = dbClient.clearDatabase();
-        System.out.println("Database cleared: " + clearResult);
+//        System.out.println("Database cleared: " + clearResult);
 
         // Example: Initialize Database
         boolean initResult = dbClient.initializeDatabase();
-        System.out.println("Database initialized: " + initResult);
+//        System.out.println("Database initialized: " + initResult);
 
         // Example: Save User
         User userToSave = new User(userType.CUSTOMER, "john_doe", "123", "seller1email@gmail.com");
         User savedUser = dbClient.saveUser(userToSave);
-        System.out.println("User saved: " + savedUser);
+//        System.out.println("User saved: " + savedUser);
 
         // Example: Get User
         User retrievedUser = dbClient.getUser("john_doe");
-        System.out.println("User retrieved: " + retrievedUser);
+//        System.out.println("User retrieved: " + retrievedUser);
 
         // Add more examples for other methods
     }
