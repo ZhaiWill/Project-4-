@@ -26,23 +26,52 @@ public class UI {
 
         if (this.loggedInUser.type == userType.CUSTOMER) {
             //CUSTOMER MENU
-            switch (generateMenu(new String[]{"Send a Message", "View Conversations", "Block/Unblock Users", "Find Sellers", "Find Stores",})) {
+            switch (generateMenu(new String[]{"Send a Message", "View Conversations", "Block/Unblock Users", "Find Sellers", "Find Stores", "Manage Account"})) {
                 case 0 -> sendMessageMenu();
                 case 1 -> viewConversationsMenu();
                 case 2 -> blockUsersMenu();
                 case 3 -> findAlternateUsersMenu();
                 case 4 -> findStoresMenu();
+                case 5 -> manageAccountMenu();
             }
         } else {
             //SELLER MENU
-            switch (generateMenu(new String[]{"Send a Message", "View Conversations", "Block/Unblock Users", "Find Customers", "Manage Store(s)",})) {
+            switch (generateMenu(new String[]{"Send a Message", "View Conversations", "Block/Unblock Users", "Find Customers", "Manage Store(s)", "Manage Account"})) {
                 case 0 -> sendMessageMenu();
                 case 1 -> viewConversationsMenu();
                 case 2 -> blockUsersMenu();
                 case 3 -> findAlternateUsersMenu();
                 case 4 -> manageStoresMenu();
+                case 5 -> manageAccountMenu();
             }
         }
+
+    }
+
+    private void manageAccountMenu() {
+        //print menu asking if you want to view stored you own or make a new store
+        switch (generateMenu(new String[]{"Edit Username", "Edit Password", "Delete Account"})) {
+            case 0 -> editUsernameMenu();
+            case 1 -> editPasswordMenu();
+            case 2 -> {
+                dbClientInstance.deleteUser(this.loggedInUser);
+                this.loggedInUser = null;
+                run();
+            }
+        }
+
+    }
+    private void editUsernameMenu() {
+        String  newName = queryValue("What would you like to be your new username?", true);
+        dbClientInstance.editUsername(this.loggedInUser,newName);
+        output.print("Successfully changed username.");
+        return;
+    }
+
+    private void editPasswordMenu() {
+        String  newPassword = queryValue("What would you like to be your new password?", true);
+        dbClientInstance.editPassword(this.loggedInUser,newPassword);
+        output.print("Successfully changed password.");
 
     }
 
